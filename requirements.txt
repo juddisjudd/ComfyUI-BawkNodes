@@ -1,0 +1,11 @@
+# Core PyTorch dependencies
+torch>=1.12.0
+torchvision>=0.13.0
+
+# Model handling
+safetensors>=0.3.0
+numpy>=1.21.0
+
+# Optional: Enhanced functionality
+# accelerate>=0.20.0  # For optimized loading
+# transformers>=4.21.0  # For advanced CLIP handling

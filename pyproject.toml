@@ -1,0 +1,51 @@
+[project]
+name = "comfyui-bawknodes"
+version = "1.0.0"
+description = "A collection of useful ComfyUI nodes including advanced diffusion model loader and more"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+keywords = ["comfyui", "diffusion", "model-loading", "ai", "flux", "nodes", "bawk"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Graphics",
+]
+
+dependencies = [
+    "torch>=1.12.0",
+    "torchvision>=0.13.0",
+    "numpy>=1.21.0",
+    "safetensors>=0.3.0",
+]
+
+[project.urls]
+Repository = "https://github.com/juddisjudd/ComfyUI-BawkNodes"
+Issues = "https://github.com/juddisjudd/ComfyUI-BawkNodes/issues"
+
+[tool.comfy]
+PublisherId = "judd"
+DisplayName = "Bawk Nodes Collection"
+Icon = ""
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["modules*", "workflows*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.yaml", "*.yml", "*.md"]
