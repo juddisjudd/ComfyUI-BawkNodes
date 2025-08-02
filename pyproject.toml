@@ -37,7 +37,7 @@ Issues = "https://github.com/juddisjudd/ComfyUI-BawkNodes/issues"
 [tool.comfy]
 PublisherId = "judd"
 DisplayName = "Bawk Nodes Collection"
-Icon = "https://github.com/juddisjudd/ComfyUI-BawkNodes/blob/main/branding/bawknodes.png"
+Icon = "https://raw.githubusercontent.com/juddisjudd/ComfyUI-BawkNodes/refs/heads/main/branding/bawknodes.png"
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]
