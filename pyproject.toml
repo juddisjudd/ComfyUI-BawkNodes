@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-bawknodes"
-version = "2.0.1"
+version = "2.0.2"
 description = "A complete collection of FLUX-optimized ComfyUI nodes for enhanced AI image generation workflows."
 readme = "README.md"
 license = { file = "LICENSE" }

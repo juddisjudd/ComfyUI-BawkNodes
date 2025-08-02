@@ -16,5 +16,5 @@ __all__ = [
 ]
 
 # Version info
-__version__ = "1.0.0"
-__author__ = "Bawk Nodes"
+__version__ = "2.0.2"
+__author__ = "judd"
