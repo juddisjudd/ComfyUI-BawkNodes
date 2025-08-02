@@ -1,0 +1,343 @@
+{
+  "id": "5acb6057-af87-40fa-90de-4b9e3cdcd5e3",
+  "revision": 0,
+  "last_node_id": 35,
+  "last_link_id": 78,
+  "nodes": [
+    {
+      "id": 30,
+      "type": "DiffusionModelLoader",
+      "pos": [
+        -259.1785888671875,
+        87.82862091064453
+      ],
+      "size": [
+        342.2134704589844,
+        214
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            74
+          ]
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            77
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            75
+          ]
+        },
+        {
+          "name": "MODEL_STRING",
+          "type": "STRING",
+          "links": [
+            66
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "ver": "97bbbef153df94caebb97f054b8fd53de1861cf1",
+        "Node name for S&R": "DiffusionModelLoader"
+      },
+      "widgets_values": [
+        "flux1-dev.safetensors",
+        "ae.safetensors",
+        "t5xxl_fp16.safetensors",
+        "clip_l.safetensors",
+        "fp8_e4m3fn"
+      ],
+      "shape": 1
+    },
+    {
+      "id": 34,
+      "type": "BawkSampler",
+      "pos": [
+        788.8836059570312,
+        87.903076171875
+      ],
+      "size": [
+        288.7222595214844,
+        622
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 72
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 73
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 77
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            76
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "ver": "97bbbef153df94caebb97f054b8fd53de1861cf1",
+        "Node name for S&R": "BawkSampler"
+      },
+      "widgets_values": [
+        "FHD 16:9 - 1920x1080",
+        4,
+        417938486318098,
+        "randomize",
+        "euler",
+        "beta",
+        30,
+        3.5,
+        0.5,
+        0.3,
+        1,
+        false,
+        1920,
+        1080
+      ],
+      "shape": 1
+    },
+    {
+      "id": 31,
+      "type": "FluxImageSaver",
+      "pos": [
+        1109.04248046875,
+        87.9061508178711
+      ],
+      "size": [
+        536.477294921875,
+        470.7662353515625
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 76
+        },
+        {
+          "name": "model_string",
+          "type": "STRING",
+          "link": 66
+        },
+        {
+          "name": "processed_prompt",
+          "type": "STRING",
+          "link": 78
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "ver": "97bbbef153df94caebb97f054b8fd53de1861cf1",
+        "Node name for S&R": "FluxImageSaver"
+      },
+      "widgets_values": [
+        "NEW-CKH",
+        "png",
+        100,
+        false,
+        true
+      ],
+      "shape": 1
+    },
+    {
+      "id": 35,
+      "type": "FluxWildcardEncode",
+      "pos": [
+        118.85038757324219,
+        87.09760284423828
+      ],
+      "size": [
+        633.321533203125,
+        695.784912109375
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 74
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 75
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            72
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": null
+        },
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            73
+          ]
+        },
+        {
+          "name": "PROMPT_OUT",
+          "type": "STRING",
+          "links": [
+            78
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "ver": "97bbbef153df94caebb97f054b8fd53de1861cf1",
+        "Node name for S&R": "FluxWildcardEncode"
+      },
+      "widgets_values": [
+        "",
+        -1,
+        false,
+        "None",
+        1,
+        false,
+        "None",
+        1,
+        false,
+        "None",
+        1,
+        false,
+        "None",
+        1,
+        false,
+        "None",
+        1,
+        false,
+        "None",
+        1
+      ],
+      "shape": 1
+    }
+  ],
+  "links": [
+    [
+      66,
+      30,
+      3,
+      31,
+      1,
+      "STRING"
+    ],
+    [
+      72,
+      35,
+      0,
+      34,
+      0,
+      "MODEL"
+    ],
+    [
+      73,
+      35,
+      2,
+      34,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      74,
+      30,
+      0,
+      35,
+      0,
+      "MODEL"
+    ],
+    [
+      75,
+      30,
+      2,
+      35,
+      1,
+      "CLIP"
+    ],
+    [
+      76,
+      34,
+      0,
+      31,
+      0,
+      "IMAGE"
+    ],
+    [
+      77,
+      30,
+      1,
+      34,
+      2,
+      "VAE"
+    ],
+    [
+      78,
+      35,
+      3,
+      31,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8358208385450411,
+      "offset": [
+        299.5806636329205,
+        171.9927929925298
+      ]
+    },
+    "frontendVersion": "1.23.4"
+  },
+  "version": 0.4
+}
