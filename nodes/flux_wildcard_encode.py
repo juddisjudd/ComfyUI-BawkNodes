@@ -8,7 +8,9 @@ import re
 import random
 import torch
 import folder_paths
-from typing import Tuple, Any
+import requests
+import time
+from typing import Tuple, Any, Optional
 
 
 # Fallback implementation for flexible inputs
@@ -85,6 +87,39 @@ class FluxWildcardEncode:
                 "lora_6_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 6 - Use for final touches or very subtle adjustments"}),
                 "lora_6_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 6 - Use for final polish or very specific adjustments"}),
                 "lora_6_strength": ("FLOAT", {"default": 0.40, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 6 strength - Recommended: 0.1-0.4 for subtle effects, negative values to reduce certain features"}),
+
+                # AI ENHANCEMENT (100% Optional)
+                "ai_enhance_enabled": ("BOOLEAN", {"default": False, "tooltip": "Enable AI prompt enhancement (requires API key)"}),
+                "ai_provider": ([
+                    "Claude (Anthropic)",
+                    "OpenAI GPT-4",
+                    "OpenAI GPT-3.5",
+                    "Grok (xAI)"
+                ], {
+                    "default": "Claude (Anthropic)",
+                    "tooltip": "AI service for prompt enhancement"
+                }),
+                "ai_api_key": ("STRING", {
+                    "default": "",
+                    "tooltip": "Your API key for Claude/OpenAI/Grok (only used if AI enhancement enabled)"
+                }),
+                "ai_style": ([
+                    "Detailed & Descriptive",
+                    "Photography Style",
+                    "Cinematic",
+                    "Artistic & Creative",
+                    "Anime/Illustration",
+                    "Professional Portrait",
+                    "Landscape/Nature",
+                    "Abstract/Conceptual"
+                ], {
+                    "default": "Detailed & Descriptive",
+                    "tooltip": "Enhancement style (only used if AI enhancement enabled)"
+                }),
+                "ai_creativity": ("FLOAT", {
+                    "default": 0.7, "min": 0.1, "max": 1.0, "step": 0.1,
+                    "tooltip": "AI creativity level - 0.3=conservative, 0.7=balanced, 1.0=very creative"
+                }),
             }
         }
     
@@ -92,9 +127,11 @@ class FluxWildcardEncode:
     RETURN_NAMES = ("MODEL", "CLIP", "CONDITIONING", "PROMPT_OUT")
     FUNCTION = "encode_with_loras"
     CATEGORY = "BawkNodes/conditioning"
-    DESCRIPTION = "FLUX text encoder with wildcard support and 6 LoRA slots"
+    DESCRIPTION = "FLUX text encoder with wildcard support, 6 LoRA slots, and optional AI prompt enhancement"
     
-    def encode_with_loras(self, model, clip, prompt, wildcard_seed=-1, **kwargs):
+    def encode_with_loras(self, model, clip, prompt, wildcard_seed=-1,
+                         ai_enhance_enabled=False, ai_provider="Claude (Anthropic)",
+                         ai_api_key="", ai_style="Detailed & Descriptive", ai_creativity=0.7, **kwargs):
         """
         Encode text prompt with wildcard processing and dynamic LoRA loading
         """
@@ -111,7 +148,24 @@ class FluxWildcardEncode:
                 processed_prompt = self._process_wildcards(prompt, wildcard_seed)
                 if processed_prompt != prompt:
                     print(f"[FluxWildcardEncode] Processed wildcards in prompt")
-            
+
+            # Step 1.5: AI Enhancement (100% Optional)
+            final_prompt = processed_prompt
+            if ai_enhance_enabled:
+                if ai_api_key.strip():
+                    print(f"[FluxWildcardEncode] AI Enhancement enabled with {ai_provider}")
+                    enhanced_prompt = self._enhance_prompt_with_ai(
+                        processed_prompt, ai_provider, ai_api_key, ai_style, ai_creativity
+                    )
+                    if enhanced_prompt:
+                        final_prompt = enhanced_prompt
+                        improvement_ratio = len(final_prompt) / len(processed_prompt) if len(processed_prompt) > 0 else 1
+                        print(f"[FluxWildcardEncode] ✅ AI Enhanced: {len(processed_prompt)} → {len(final_prompt)} chars ({improvement_ratio:.1f}x)")
+                    else:
+                        print(f"[FluxWildcardEncode] ⚠️  AI enhancement failed, using original prompt")
+                else:
+                    print(f"[FluxWildcardEncode] ⚠️  AI enhancement enabled but no API key provided")
+
             # Step 2: Apply LoRAs from fixed slots with smart validation
             working_model = model
             working_clip = clip
@@ -155,19 +209,20 @@ class FluxWildcardEncode:
             else:
                 print(f"[FluxWildcardEncode] No LoRAs applied")
             
-            # Step 3: Encode the processed prompt
-            if not processed_prompt.strip():
-                print("[FluxWildcardEncode] Warning: Empty prompt")
+            # Step 3: Encode the final prompt (after optional AI enhancement)
+            if not final_prompt.strip():
+                print("[FluxWildcardEncode] Warning: Empty final prompt")
                 empty_conditioning = [[torch.zeros((1, 77, 768)), {"pooled_output": torch.zeros((1, 768))}]]
-                return (working_model, working_clip, empty_conditioning, processed_prompt)
-            
+                return (working_model, working_clip, empty_conditioning, final_prompt)
+
             # Encode using the LoRA-modified CLIP
-            tokens = working_clip.tokenize(processed_prompt)
+            tokens = working_clip.tokenize(final_prompt)
             conditioning, pooled = working_clip.encode_from_tokens(tokens, return_pooled=True)
             conditioning = [[conditioning, {"pooled_output": pooled}]]
-            
-            print(f"[FluxWildcardEncode] Success: {ui_lora_count} LoRAs, conditioning shape: {conditioning[0][0].shape}")
-            return (working_model, working_clip, conditioning, processed_prompt)
+
+            ai_status = " + AI Enhanced" if ai_enhance_enabled and final_prompt != processed_prompt else ""
+            print(f"[FluxWildcardEncode] ✅ Success: {ui_lora_count} LoRAs{ai_status}, conditioning shape: {conditioning[0][0].shape}")
+            return (working_model, working_clip, conditioning, final_prompt)
             
         except Exception as e:
             error_msg = f"Failed to encode with LoRAs: {str(e)}"
@@ -326,3 +381,181 @@ class FluxWildcardEncode:
                 cleaned[key] = value
 
         return cleaned
+
+    def _enhance_prompt_with_ai(self, prompt: str, provider: str, api_key: str, style: str, creativity: float) -> Optional[str]:
+        """
+        Enhance prompt using AI APIs (100% optional)
+        """
+        try:
+            # Security: mask API key in logs
+            safe_key_display = f"{api_key[:8]}..." if len(api_key) > 8 else "***"
+            print(f"[FluxWildcardEncode] Enhancing with {provider} (key: {safe_key_display})")
+
+            # Build enhancement system prompt
+            system_prompt = self._build_ai_system_prompt(style, creativity)
+
+            # Call appropriate API
+            if provider == "Claude (Anthropic)":
+                return self._call_claude_api(api_key, system_prompt, prompt)
+            elif provider.startswith("OpenAI"):
+                model = "gpt-4" if "GPT-4" in provider else "gpt-3.5-turbo"
+                return self._call_openai_api(api_key, system_prompt, prompt, model, creativity)
+            elif provider == "Grok (xAI)":
+                return self._call_grok_api(api_key, system_prompt, prompt, creativity)
+            else:
+                print(f"[FluxWildcardEncode] Unsupported AI provider: {provider}")
+                return None
+
+        except Exception as e:
+            print(f"[FluxWildcardEncode] AI enhancement error: {str(e)}")
+            return None
+
+    def _build_ai_system_prompt(self, style: str, creativity: float) -> str:
+        """Build AI enhancement system prompt based on style and creativity"""
+
+        base_prompt = """You are an expert prompt engineer for FLUX image generation. Transform the given prompt into a more detailed, descriptive version that will produce higher quality images.
+
+FLUX works best with:
+- Detailed, specific descriptions
+- Technical photography/artistic terms
+- Lighting and composition details
+- Clear subject descriptions
+- Specific style references
+
+IMPORTANT: Return ONLY the enhanced prompt, no explanations."""
+
+        style_instructions = {
+            "Detailed & Descriptive": "Add rich details, textures, lighting, and environmental context.",
+            "Photography Style": "Include camera settings, lens types, lighting setups, and photographic techniques.",
+            "Cinematic": "Add film techniques, dramatic lighting, camera angles, and mood descriptions.",
+            "Artistic & Creative": "Include art movement references, creative techniques, and artistic mediums.",
+            "Anime/Illustration": "Add anime-specific terminology, character details, and illustration styles.",
+            "Professional Portrait": "Focus on portrait lighting, professional setups, and subject positioning.",
+            "Landscape/Nature": "Add environmental details, natural lighting, and atmospheric effects.",
+            "Abstract/Conceptual": "Include abstract concepts, symbolic elements, and artistic interpretation."
+        }
+
+        creativity_instruction = f"""
+Creativity Level: {creativity:.1f}
+- 0.1-0.3: Minimal changes, focus on clarity and technical accuracy
+- 0.4-0.6: Moderate enhancement with some creative additions
+- 0.7-0.9: Creative enhancement with significant artistic improvements
+- 1.0: Very creative, bold artistic interpretation
+"""
+
+        style_specific = style_instructions.get(style, style_instructions["Detailed & Descriptive"])
+
+        return f"{base_prompt}\n\nStyle Focus: {style_specific}\n{creativity_instruction}"
+
+    def _call_claude_api(self, api_key: str, system_prompt: str, user_prompt: str) -> Optional[str]:
+        """Call Claude API for prompt enhancement"""
+        try:
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01"
+            }
+
+            data = {
+                "model": "claude-3-5-sonnet-20241022",
+                "max_tokens": 500,
+                "system": system_prompt,
+                "messages": [{"role": "user", "content": f"Enhance this FLUX prompt: {user_prompt}"}]
+            }
+
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+
+            if response.status_code == 200:
+                result = response.json()
+                enhanced = result["content"][0]["text"].strip()
+                return enhanced
+            else:
+                print(f"[FluxWildcardEncode] Claude API error {response.status_code}: {response.text}")
+                return None
+
+        except requests.exceptions.Timeout:
+            print(f"[FluxWildcardEncode] Claude API timeout")
+            return None
+        except Exception as e:
+            print(f"[FluxWildcardEncode] Claude API error: {str(e)}")
+            return None
+
+    def _call_openai_api(self, api_key: str, system_prompt: str, user_prompt: str, model: str, creativity: float) -> Optional[str]:
+        """Call OpenAI API for prompt enhancement"""
+        try:
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+
+            # Map creativity to temperature
+            temperature = min(creativity * 1.2, 1.0)
+
+            data = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Enhance this FLUX prompt: {user_prompt}"}
+                ],
+                "max_tokens": 400,
+                "temperature": temperature
+            }
+
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+
+            if response.status_code == 200:
+                result = response.json()
+                enhanced = result["choices"][0]["message"]["content"].strip()
+                return enhanced
+            else:
+                print(f"[FluxWildcardEncode] OpenAI API error {response.status_code}: {response.text}")
+                return None
+
+        except requests.exceptions.Timeout:
+            print(f"[FluxWildcardEncode] OpenAI API timeout")
+            return None
+        except Exception as e:
+            print(f"[FluxWildcardEncode] OpenAI API error: {str(e)}")
+            return None
+
+    def _call_grok_api(self, api_key: str, system_prompt: str, user_prompt: str, creativity: float) -> Optional[str]:
+        """Call Grok API for prompt enhancement"""
+        try:
+            url = "https://api.x.ai/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+
+            # Map creativity to temperature (Grok supports 0.0-2.0)
+            temperature = min(creativity * 1.5, 2.0)
+
+            data = {
+                "model": "grok-beta",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Enhance this FLUX prompt: {user_prompt}"}
+                ],
+                "max_tokens": 500,
+                "temperature": temperature,
+                "stream": False
+            }
+
+            response = requests.post(url, headers=headers, json=data, timeout=45)
+
+            if response.status_code == 200:
+                result = response.json()
+                enhanced = result["choices"][0]["message"]["content"].strip()
+                return enhanced
+            else:
+                print(f"[FluxWildcardEncode] Grok API error {response.status_code}: {response.text}")
+                return None
+
+        except requests.exceptions.Timeout:
+            print(f"[FluxWildcardEncode] Grok API timeout (45s)")
+            return None
+        except Exception as e:
+            print(f"[FluxWildcardEncode] Grok API error: {str(e)}")
+            return None

@@ -35,7 +35,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
 
-__version__ = "2.0.5"
+__version__ = "2.1.0"
 __author__ = "Bawk Nodes"
 __description__ = "A complete collection of FLUX-optimized ComfyUI nodes for enhanced workflows"
 
@@ -44,7 +44,7 @@ print(f"\033[1m\033[92m🐓 ComfyUI Bawk Nodes v{__version__} loaded successfull
 print(f"\033[1m\033[93m   🎉 Major Update - Complete FLUX Workflow Suite!\033[0m")
 print(f"\033[1m\033[96m   Current nodes:\033[0m")
 print(f"\033[94m   • 🚀  Bawk Model Loader - FLUX-optimized model loading with advanced caching\033[0m")
-print(f"\033[95m   • 🎲  Bawk Wildcard Encoder - Text encoding, wildcards & 6 LoRA slots\033[0m")
+print(f"\033[95m   • 🎲  Bawk Wildcard Encoder - Text encoding, wildcards, 6 LoRA slots & optional AI enhancement\033[0m")
 print(f"\033[92m   • 💾  Bawk Image Saver - Organized saving with metadata, prompts & Discord webhooks\033[0m")
 print(f"\033[91m   • 🐓  Bawk Sampler - All-in-one text2img and img2img sampler with VAE decoding\033[0m")
 print(f"\033[93m   • 📁  Bawk Batch Processor - Process multiple prompts from CSV/JSON files\033[0m")

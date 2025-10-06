@@ -6,6 +6,9 @@ torchvision>=0.13.0
 safetensors>=0.3.0
 numpy>=1.21.0
 
+# Bawk Prompt Enhancer dependencies
+requests>=2.25.0  # For API calls to Claude/OpenAI
+
 # Optional: Enhanced functionality
 # accelerate>=0.20.0  # For optimized loading
 # transformers>=4.21.0  # For advanced CLIP handling

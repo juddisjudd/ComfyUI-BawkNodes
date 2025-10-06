@@ -1,5 +1,5 @@
 <div align="center">
-<h1>ComfyUI Bawk Nodes v2.0.5</h1>
+<h1>ComfyUI Bawk Nodes v2.1.0</h1>
 
 **The Ultimate FLUX Workflow Suite for ComfyUI**
 
@@ -7,7 +7,7 @@
 
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-Compatible-brightgreen)](https://github.com/comfyanonymous/ComfyUI)
 [![FLUX](https://img.shields.io/badge/FLUX-Optimized-blue)](https://blackforestlabs.ai/)
-[![Version](https://img.shields.io/badge/Version-2.0.5-orange)]()
+[![Version](https://img.shields.io/badge/Version-2.1.0-orange)]()
 
 </div>
 
@@ -38,9 +38,10 @@
 - **Multiple formats** - JPG, PNG, WEBP, and more
 
 ### **Bawk Wildcard Encoder**
-*Text prompts + LoRAs made simple*
+*Text prompts + LoRAs + AI enhancement made simple*
 - **6 LoRA slots** with smart recommendations
 - **Wildcard support** - Randomize your prompts
+- **Optional AI enhancement** - Claude, OpenAI & Grok integration for better prompts
 - **Helpful tooltips** - Know exactly what each setting does
 - **FLUX-optimized** text encoding
 
@@ -79,6 +80,7 @@
 - **Validation** - Helpful warnings for compatibility issues
 - **FLUX-specific** optimizations
 
+
 ---
 
 ## **Quick Start Guide**
@@ -94,7 +96,14 @@ Bawk Image Loader → Bawk Sampler → Bawk Image Saver
                    ↗ (set denoise 0.6-0.8)
 ```
 
-### **3. Batch Generation Workflow**
+### **3. AI-Enhanced Prompt Workflow**
+```
+Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
+  (LoRAs + wildcards       (generate)
+   + AI enhancement)
+```
+
+### **4. Batch Generation Workflow**
 ```
 Bawk Batch Processor → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
 ```
@@ -117,6 +126,13 @@ Bawk Batch Processor → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image S
 - Create **CSV files** with prompts and settings
 - Use **Bawk Batch Processor** for unattended generation
 - **Discord integration** notifies you when batches complete
+
+### **AI-Enhanced Prompting**
+- **Built into Wildcard Encoder** - Just enable AI enhancement and add your API key
+- Transform **simple prompts** into detailed, professional descriptions
+- **Multiple AI providers** - Claude (Anthropic), OpenAI (GPT-4/3.5), and Grok (xAI)
+- **8 enhancement styles** - Photography, cinematic, artistic, and more
+- **100% optional** - Works perfectly without AI enhancement enabled
 
 ---
 
@@ -141,6 +157,24 @@ prompt,seed,steps,guidance,resolution
 "beautiful sunset",12345,30,3.5,"Instagram Square - 1080x1080 - 1.2MP"
 "city at night",67890,25,4.0,"Instagram Story - 1080x1920 - 2.1MP"
 ```
+
+### **AI Enhancement (Built into Wildcard Encoder)**
+- **Enable in Wildcard Encoder**: Set ai_enhance_enabled to True and add your API key
+- **Start simple**: "cat on chair" → Enhanced: "Elegant domestic cat with sleek fur sitting gracefully on vintage wooden chair, soft natural lighting, professional photography composition"
+- **Provider Comparison**: Claude (balanced, cost-effective), GPT-4 (high quality, expensive), GPT-3.5 (fast, budget), Grok (creative, experimental)
+- **API Key Security**: Keys are masked in logs and only used when enhancement is enabled
+- **Creativity Levels**: 0.3 for subtle enhancement, 0.7 for creative improvement, 1.0 for artistic interpretation
+
+---
+
+## **What's New in v2.1.0**
+
+- **Integrated AI Enhancement** - Built directly into Bawk Wildcard Encoder (100% optional)
+- **Multi-Provider AI Support** - Claude (Anthropic), OpenAI (GPT-4/3.5), and Grok (xAI)
+- **8 Enhancement Styles** - Photography, cinematic, artistic, portrait, landscape, and more
+- **Simplified Workflow** - Single node handles wildcards, LoRAs, and AI enhancement
+- **Security First** - API keys masked in logs, graceful error handling
+- **FLUX Resolution Optimization** - Updated presets based on official limits and community research
 
 ---
 
