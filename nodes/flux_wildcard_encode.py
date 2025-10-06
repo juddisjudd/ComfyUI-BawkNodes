@@ -3,6 +3,7 @@ FluxWildcardEncode Node with LoRA Support (using rgthree-style dynamic UI)
 File: nodes/flux_wildcard_encode.py
 """
 
+import os
 import re
 import random
 import torch
@@ -56,34 +57,34 @@ class FluxWildcardEncode:
             },
             "optional": {
                 # LoRA 1
-                "lora_1_on": ("BOOLEAN", {"default": False}),
-                "lora_1_name": (lora_options, {"default": "None"}),
-                "lora_1_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01}),
-                
+                "lora_1_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 1 - Use for primary style/character modifications"}),
+                "lora_1_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 1 - Choose your main style or character LoRA"}),
+                "lora_1_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 1 strength - Recommended: 0.6-1.2 for styles, 0.8-1.0 for characters"}),
+
                 # LoRA 2
-                "lora_2_on": ("BOOLEAN", {"default": False}),
-                "lora_2_name": (lora_options, {"default": "None"}),
-                "lora_2_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01}),
-                
+                "lora_2_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 2 - Use for secondary effects or style blending"}),
+                "lora_2_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 2 - Good for lighting or pose adjustments"}),
+                "lora_2_strength": ("FLOAT", {"default": 0.80, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 2 strength - Recommended: 0.5-0.8 for subtle effects, 0.8-1.2 for strong effects"}),
+
                 # LoRA 3
-                "lora_3_on": ("BOOLEAN", {"default": False}),
-                "lora_3_name": (lora_options, {"default": "None"}),
-                "lora_3_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01}),
-                
+                "lora_3_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 3 - Use for clothing, objects, or environmental effects"}),
+                "lora_3_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 3 - Perfect for clothing or object LoRAs"}),
+                "lora_3_strength": ("FLOAT", {"default": 0.70, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 3 strength - Recommended: 0.4-0.7 for clothing, 0.6-1.0 for objects"}),
+
                 # LoRA 4
-                "lora_4_on": ("BOOLEAN", {"default": False}),
-                "lora_4_name": (lora_options, {"default": "None"}),
-                "lora_4_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01}),
-                
+                "lora_4_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 4 - Use for fine details or texture adjustments"}),
+                "lora_4_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 4 - Good for detail enhancement or texture LoRAs"}),
+                "lora_4_strength": ("FLOAT", {"default": 0.60, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 4 strength - Recommended: 0.3-0.6 for subtle details, 0.5-0.8 for noticeable changes"}),
+
                 # LoRA 5
-                "lora_5_on": ("BOOLEAN", {"default": False}),
-                "lora_5_name": (lora_options, {"default": "None"}),
-                "lora_5_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01}),
-                
+                "lora_5_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 5 - Use for color grading or mood adjustments"}),
+                "lora_5_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 5 - Ideal for color/mood LoRAs or experimental combinations"}),
+                "lora_5_strength": ("FLOAT", {"default": 0.50, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 5 strength - Recommended: 0.2-0.5 for color adjustments, 0.4-0.7 for experimental effects"}),
+
                 # LoRA 6
-                "lora_6_on": ("BOOLEAN", {"default": False}),
-                "lora_6_name": (lora_options, {"default": "None"}),
-                "lora_6_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01}),
+                "lora_6_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 6 - Use for final touches or very subtle adjustments"}),
+                "lora_6_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 6 - Use for final polish or very specific adjustments"}),
+                "lora_6_strength": ("FLOAT", {"default": 0.40, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 6 strength - Recommended: 0.1-0.4 for subtle effects, negative values to reduce certain features"}),
             }
         }
     
@@ -108,20 +109,26 @@ class FluxWildcardEncode:
                 if processed_prompt != prompt:
                     print(f"[FluxWildcardEncode] Processed wildcards in prompt")
             
-            # Step 2: Apply LoRAs from fixed slots
+            # Step 2: Apply LoRAs from fixed slots with smart validation
             working_model = model
             working_clip = clip
             ui_lora_count = 0
-            
+            lora_warnings = []
+
             # Process 6 fixed LoRA slots
             for i in range(1, 7):  # LoRA 1-6
                 on_key = f"lora_{i}_on"
                 name_key = f"lora_{i}_name"
                 strength_key = f"lora_{i}_strength"
-                
+
                 # Check if this LoRA slot is enabled and has a valid selection
                 lora_enabled = kwargs.get(on_key, False)
                 lora_name = kwargs.get(name_key, "None")
+                lora_strength = kwargs.get(strength_key, 1.0)
+
+                # Validate LoRA configuration and provide feedback
+                if lora_enabled and lora_name != "None":
+                    self._validate_lora_config(i, lora_name, lora_strength, lora_warnings)
                 
                 if lora_enabled and lora_name and lora_name != "None":
                     strength = kwargs.get(strength_key, 1.00)
@@ -238,3 +245,42 @@ class FluxWildcardEncode:
         
         print(f"[FluxWildcardEncode] LoRA '{file_path}' not found")
         return None
+
+    def _validate_lora_config(self, slot_num, lora_name, strength, warnings_list):
+        """Validate LoRA configuration and provide helpful feedback"""
+
+        # Check strength values and provide recommendations
+        if strength > 2.0:
+            warnings_list.append(f"LoRA {slot_num}: Very high strength ({strength:.2f}) may cause artifacts or overfitting")
+            print(f"[FluxWildcardEncode] ⚠️  LoRA {slot_num} strength ({strength:.2f}) is very high - consider reducing to 0.6-1.2")
+        elif strength > 1.5:
+            print(f"[FluxWildcardEncode] ℹ️  LoRA {slot_num} strength ({strength:.2f}) is high - monitor for quality issues")
+
+        if strength < 0.1 and strength > 0:
+            print(f"[FluxWildcardEncode] ℹ️  LoRA {slot_num} strength ({strength:.2f}) is very low - effect may be minimal")
+        elif strength < 0:
+            print(f"[FluxWildcardEncode] ℹ️  LoRA {slot_num} using negative strength ({strength:.2f}) to reduce features")
+
+        # Provide slot-specific recommendations based on typical usage patterns
+        slot_recommendations = {
+            1: "Primary LoRA - Best for main character or style (recommended: 0.8-1.2)",
+            2: "Secondary LoRA - Good for lighting or pose adjustments (recommended: 0.6-1.0)",
+            3: "Detail LoRA - Perfect for clothing or objects (recommended: 0.5-0.8)",
+            4: "Texture LoRA - Use for material or surface details (recommended: 0.4-0.7)",
+            5: "Mood LoRA - Ideal for color grading or atmosphere (recommended: 0.3-0.6)",
+            6: "Polish LoRA - Final touches or subtle adjustments (recommended: 0.2-0.5)"
+        }
+
+        if slot_num <= 6:
+            print(f"[FluxWildcardEncode] ✅ LoRA {slot_num} loaded: {lora_name} @ {strength:.2f} ({slot_recommendations[slot_num]})")
+
+        # Check for common LoRA naming patterns to suggest optimal strengths
+        lora_lower = lora_name.lower()
+        if "style" in lora_lower and strength < 0.6:
+            print(f"[FluxWildcardEncode] 💡 Style LoRAs typically work best at 0.8-1.2 strength")
+        elif "character" in lora_lower and strength < 0.7:
+            print(f"[FluxWildcardEncode] 💡 Character LoRAs typically work best at 0.8-1.1 strength")
+        elif "pose" in lora_lower and strength > 1.0:
+            print(f"[FluxWildcardEncode] 💡 Pose LoRAs often work better at 0.6-0.9 strength")
+        elif "lighting" in lora_lower and strength > 0.8:
+            print(f"[FluxWildcardEncode] 💡 Lighting LoRAs typically work best at 0.4-0.7 strength")

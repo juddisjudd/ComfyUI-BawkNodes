@@ -1,5 +1,5 @@
 <div align="center">
-<h1>🐓 ComfyUI Bawk Nodes v2.0.0</h1>
+<h1>🐓 ComfyUI Bawk Nodes v2.0.4</h1>
 
 **A collection of FLUX-optimized ComfyUI nodes for efficient AI image generation.**
 
@@ -9,7 +9,7 @@
 
 ---
 
-## 🎯 **What's New in v2.0.0**
+## 🎯 **What's New in v2.0.4**
 
 **Major Rewrite**: Complete FLUX-first redesign with modular architecture and workflow consolidation.
 

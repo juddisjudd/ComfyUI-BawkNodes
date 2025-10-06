@@ -67,38 +67,54 @@ class BawkSampler:
     
     @classmethod
     def INPUT_TYPES(cls):
-        # Combined resolution presets with aspect ratios built-in
-        # Format: "Name - WxH (aspect ratio)"
+        # Enhanced resolution presets with Instagram formats and megapixel info
+        # Format: "Name - WxH (aspect ratio) - MP"
         resolution_presets = [
-            # 16:9 aspect ratio options
-            "HD 16:9 - 1024x576",
-            "FHD 16:9 - 1920x1080", 
-            "2K 16:9 - 2048x1152",
-            
-            # 1:1 square options  
-            "Small Square - 768x768",
-            "Medium Square - 1024x1024",
-            "Large Square - 1536x1536",
-            "XL Square - 2048x2048",
-            
+            # 16:9 widescreen
+            "HD 16:9 - 1024x576 - 0.6MP",
+            "FHD 16:9 - 1920x1080 - 2.1MP",
+            "2K 16:9 - 2048x1152 - 2.4MP",
+            "4K 16:9 - 3840x2160 - 8.3MP",
+
+            # 1:1 square (Instagram posts)
+            "Instagram Square - 1080x1080 - 1.2MP",
+            "Small Square - 768x768 - 0.6MP",
+            "Medium Square - 1024x1024 - 1.0MP",
+            "Large Square - 1536x1536 - 2.4MP",
+            "XL Square - 2048x2048 - 4.2MP",
+
+            # 9:16 portrait (Instagram Stories/Reels)
+            "Instagram Story - 1080x1920 - 2.1MP",
+            "Instagram Reel - 1080x1920 - 2.1MP",
+            "TikTok - 1080x1920 - 2.1MP",
+            "Mobile Portrait - 720x1280 - 0.9MP",
+            "HD Portrait - 1080x1920 - 2.1MP",
+
+            # 4:5 Instagram portrait posts
+            "Instagram Portrait - 1080x1350 - 1.5MP",
+            "Instagram Portrait HD - 1440x1800 - 2.6MP",
+
             # 3:2 photo aspect ratio
-            "Photo 3:2 - 1152x768",
-            "Photo 3:2 HD - 1728x1152",
-            
+            "Photo 3:2 - 1152x768 - 0.9MP",
+            "Photo 3:2 HD - 1728x1152 - 2.0MP",
+            "Print 3:2 - 2400x1600 - 3.8MP",
+
             # 4:3 classic aspect ratio
-            "Classic 4:3 - 1024x768",
-            "Classic 4:3 HD - 1536x1152",
-            
-            # 9:16 portrait/mobile
-            "Portrait 9:16 - 576x1024",
-            "Mobile 9:16 - 1080x1920",
-            
-            # 2:3 portrait photo
-            "Portrait Photo - 768x1152",
-            
-            # 21:9 ultra-wide
-            "Ultra-wide - 1792x768",
-            
+            "Classic 4:3 - 1024x768 - 0.8MP",
+            "Classic 4:3 HD - 1536x1152 - 1.8MP",
+
+            # 21:9 ultra-wide (cinematic)
+            "Cinematic 21:9 - 1792x768 - 1.4MP",
+            "Ultra-wide - 2560x1080 - 2.8MP",
+
+            # 2.35:1 cinematic
+            "Cinema 2.35:1 - 1920x817 - 1.6MP",
+            "Cinema Wide - 2048x872 - 1.8MP",
+
+            # 5:4 classic photo
+            "Classic Print 5:4 - 1280x1024 - 1.3MP",
+            "Large Print 5:4 - 1600x1280 - 2.0MP",
+
             # Custom option
             "Custom Resolution",
         ]
@@ -191,28 +207,36 @@ class BawkSampler:
         Generate optimized latent, perform FLUX sampling, and decode to images
         """
         try:
+            # Step 0: Smart validation with user feedback
+            self._validate_parameters_with_feedback(
+                model, batch_size, steps, guidance, max_shift, base_shift,
+                resolution, use_custom_resolution, custom_width, custom_height
+            )
+
             # Step 1: Generate optimized latent
             latent = self._generate_optimized_latent(
                 resolution, batch_size, use_custom_resolution, custom_width, custom_height
             )
-            
+
             # Step 2: Perform sampling
             sampled_latent = self._perform_flux_sampling(
                 model, conditioning, latent, seed, sampler, scheduler,
                 steps, guidance, max_shift, base_shift, denoise
             )
-            
+
             # Step 3: Decode latent to images using VAE
             decoded_images = self._decode_latent_to_images(vae, sampled_latent)
-            
+
             print(f"[BawkSampler] Successfully generated, sampled, and decoded {batch_size} images")
-            
+
             return (decoded_images, sampled_latent)
             
         except Exception as e:
-            error_msg = f"BawkSampler failed: {str(e)}"
-            print(f"[BawkSampler] Error: {error_msg}")
-            raise RuntimeError(error_msg)
+            error_msg, suggestion = self._get_error_with_solution(str(e))
+            print(f"[BawkSampler] ❌ Error: {error_msg}")
+            if suggestion:
+                print(f"[BawkSampler] 💡 Suggestion: {suggestion}")
+            raise RuntimeError(f"{error_msg}\nSuggestion: {suggestion}" if suggestion else error_msg)
     
     def _generate_optimized_latent(
         self, resolution, batch_size, use_custom_resolution, custom_width, custom_height
@@ -253,24 +277,30 @@ class BawkSampler:
     def _parse_resolution_preset(self, resolution_preset):
         """Parse width and height from resolution preset string"""
         try:
-            # Extract dimensions from string like "FHD 16:9 - 1920x1080"
-            # Split by " - " and take the part after it
+            # Extract dimensions from string like "Instagram Square - 1080x1080 - 1.2MP"
+            # Split by " - " and take the dimensions part (middle section)
             parts = resolution_preset.split(" - ")
             if len(parts) < 2:
                 raise ValueError(f"Invalid resolution format: {resolution_preset}")
-            
-            dimensions = parts[1]  # e.g., "1920x1080"
-            width_str, height_str = dimensions.split("x")
-            
-            target_width = int(width_str)
-            target_height = int(height_str)
-            
+
+            # Handle both old format "Name - WxH" and new format "Name - WxH - MP"
+            dimensions_part = parts[1]  # e.g., "1080x1080" or "1920x1080"
+
+            # Extract just the WxH part (ignore any MP info)
+            if "x" not in dimensions_part:
+                raise ValueError(f"No dimensions found in: {dimensions_part}")
+
+            width_str, height_str = dimensions_part.split("x")
+
+            target_width = int(width_str.strip())
+            target_height = int(height_str.strip())
+
             # Ensure dimensions are multiples of 64 for FLUX compatibility
             target_width = round_to_nearest_multiple(target_width, 64)
             target_height = round_to_nearest_multiple(target_height, 64)
-            
+
             return target_width, target_height
-            
+
         except Exception as e:
             print(f"[BawkSampler] Warning: Could not parse resolution '{resolution_preset}': {e}")
             # Fallback to default FHD resolution
@@ -335,3 +365,148 @@ class BawkSampler:
             error_msg = f"Failed to decode latent: {str(e)}"
             print(f"[BawkSampler] Error: {error_msg}")
             raise RuntimeError(error_msg)
+
+    def _validate_parameters_with_feedback(
+        self, model, batch_size, steps, guidance, max_shift, base_shift,
+        resolution, use_custom_resolution, custom_width, custom_height
+    ):
+        """Smart validation with user-friendly feedback and recommendations"""
+
+        # Validate batch size for performance
+        if batch_size > 16:
+            print(f"[BawkSampler] ⚠️  WARNING: Large batch size ({batch_size}) may cause memory issues. Consider reducing to 8-16 for better stability.")
+        elif batch_size > 8:
+            print(f"[BawkSampler] ℹ️  INFO: Batch size {batch_size} is large. Monitor memory usage during generation.")
+
+        # Validate steps for quality/performance balance
+        if steps < 20:
+            print(f"[BawkSampler] ⚠️  WARNING: Low step count ({steps}) may result in poor quality. Recommended: 20-40 steps for FLUX.")
+        elif steps > 50:
+            print(f"[BawkSampler] ℹ️  INFO: High step count ({steps}) will increase generation time. Consider 20-40 for faster results.")
+
+        # Validate guidance scale for FLUX
+        if guidance < 1.0:
+            print(f"[BawkSampler] ⚠️  WARNING: Very low guidance ({guidance}) may ignore your prompt. Recommended: 3.0-7.0 for FLUX.")
+        elif guidance > 10.0:
+            print(f"[BawkSampler] ⚠️  WARNING: Very high guidance ({guidance}) may cause artifacts. Recommended: 3.0-7.0 for FLUX.")
+
+        # Validate shift parameters for FLUX
+        if max_shift > 1.5:
+            print(f"[BawkSampler] ⚠️  WARNING: High max_shift ({max_shift}) may cause instability. Recommended: 0.3-1.0 for FLUX.")
+        if base_shift > max_shift:
+            print(f"[BawkSampler] ⚠️  WARNING: base_shift ({base_shift}) should be ≤ max_shift ({max_shift}). Consider adjusting values.")
+
+        # Validate resolution for memory usage
+        if use_custom_resolution:
+            total_pixels = custom_width * custom_height
+            if total_pixels > 4096 * 4096:
+                print(f"[BawkSampler] ⚠️  WARNING: Very high resolution ({custom_width}x{custom_height}) will require significant memory. Consider using presets.")
+            elif total_pixels > 2048 * 2048:
+                print(f"[BawkSampler] ℹ️  INFO: High resolution ({custom_width}x{custom_height}) detected. Ensure sufficient VRAM.")
+
+        # Memory estimation and recommendations
+        self._estimate_memory_usage(batch_size, resolution, use_custom_resolution, custom_width, custom_height)
+
+        print(f"[BawkSampler] ✅ Validation complete. Proceeding with generation...")
+
+    def _estimate_memory_usage(self, batch_size, resolution, use_custom_resolution, custom_width, custom_height):
+        """Estimate and report memory usage"""
+        try:
+            # Get dimensions
+            if use_custom_resolution:
+                width, height = custom_width, custom_height
+            else:
+                width, height = self._parse_resolution_preset(resolution)
+
+            # FLUX latent calculations (16 channels, 8x downscale)
+            latent_width = width // 8
+            latent_height = height // 8
+
+            # Estimate memory usage (rough calculation)
+            # Latent: batch_size * 16 * latent_height * latent_width * 4 bytes (fp32)
+            latent_memory_mb = (batch_size * 16 * latent_height * latent_width * 4) / (1024 * 1024)
+
+            # Final image: batch_size * 3 * height * width * 4 bytes (fp32)
+            image_memory_mb = (batch_size * 3 * height * width * 4) / (1024 * 1024)
+
+            total_estimated_mb = latent_memory_mb + image_memory_mb
+
+            if total_estimated_mb > 2048:  # > 2GB
+                print(f"[BawkSampler] ⚠️  MEMORY: Estimated usage ~{total_estimated_mb:.0f}MB. Consider reducing batch size or resolution.")
+            elif total_estimated_mb > 1024:  # > 1GB
+                print(f"[BawkSampler] ℹ️  MEMORY: Estimated usage ~{total_estimated_mb:.0f}MB. Monitor VRAM during generation.")
+            else:
+                print(f"[BawkSampler] ✅ MEMORY: Estimated usage ~{total_estimated_mb:.0f}MB. Should run smoothly.")
+
+        except Exception as e:
+            print(f"[BawkSampler] Could not estimate memory usage: {str(e)}")
+
+    def _get_error_with_solution(self, error_msg: str):
+        """Generate helpful error messages with suggested solutions"""
+        error_lower = error_msg.lower()
+
+        # Memory-related errors
+        if "out of memory" in error_lower or "cuda out of memory" in error_lower:
+            return (
+                "GPU memory exhausted during generation",
+                "Try reducing batch size, using a smaller resolution preset, or closing other GPU applications"
+            )
+
+        # Model loading errors
+        if "model" in error_lower and ("load" in error_lower or "file" in error_lower):
+            return (
+                "Failed to load model",
+                "Ensure the model file exists and is a valid FLUX checkpoint. Check file permissions and disk space"
+            )
+
+        # Dimension/tensor errors
+        if "size mismatch" in error_lower or "dimension" in error_lower:
+            return (
+                "Tensor dimension mismatch",
+                "This usually indicates model incompatibility. Ensure you're using a FLUX model, not SD1.5/SDXL"
+            )
+
+        # CUDA/device errors
+        if "cuda" in error_lower and "device" in error_lower:
+            return (
+                "GPU device error",
+                "Check CUDA installation, update GPU drivers, or switch to CPU mode if GPU issues persist"
+            )
+
+        # Resolution parsing errors
+        if "resolution" in error_lower or "parse" in error_lower:
+            return (
+                "Resolution parsing failed",
+                "Use a preset resolution or ensure custom dimensions are multiples of 64"
+            )
+
+        # VAE decoding errors
+        if "vae" in error_lower or "decode" in error_lower:
+            return (
+                "VAE decoding failed",
+                "Ensure VAE is compatible with FLUX. Try using the built-in FLUX VAE or check VAE file integrity"
+            )
+
+        # Sampling errors
+        if "sampl" in error_lower or "noise" in error_lower:
+            return (
+                "Sampling process failed",
+                "Try different sampler/scheduler combinations, reduce steps, or adjust guidance scale (3.0-7.0 recommended)"
+            )
+
+        # File permission errors
+        if "permission" in error_lower or "access" in error_lower:
+            return (
+                "File access permission denied",
+                "Check file permissions, ensure ComfyUI has write access to output directory, or run as administrator"
+            )
+
+        # Network/download errors
+        if "download" in error_lower or "network" in error_lower or "connection" in error_lower:
+            return (
+                "Network or download error",
+                "Check internet connection, verify URLs, or try downloading models manually"
+            )
+
+        # Generic fallback
+        return (error_msg, "Check the console for detailed error information and ensure all inputs are valid")
