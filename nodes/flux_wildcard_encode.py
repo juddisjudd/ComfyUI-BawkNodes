@@ -44,7 +44,7 @@ class FluxWildcardEncode:
         # Get available LoRA files
         lora_list = folder_paths.get_filename_list("loras")
         lora_options = ["None"] + lora_list
-        
+
         return {
             "required": {
                 "model": ("MODEL",),
@@ -92,7 +92,7 @@ class FluxWildcardEncode:
     RETURN_NAMES = ("MODEL", "CLIP", "CONDITIONING", "PROMPT_OUT")
     FUNCTION = "encode_with_loras"
     CATEGORY = "BawkNodes/conditioning"
-    DESCRIPTION = "🎲 FLUX Wildcard Encoder with Dynamic LoRA Support"
+    DESCRIPTION = "FLUX text encoder with wildcard support and 6 LoRA slots"
     
     def encode_with_loras(self, model, clip, prompt, wildcard_seed=-1, **kwargs):
         """
@@ -101,7 +101,10 @@ class FluxWildcardEncode:
         try:
             print(f"[FluxWildcardEncode] Starting encode with dynamic LoRAs")
             print(f"[FluxWildcardEncode] Received kwargs: {list(kwargs.keys())}")
-            
+
+            # Clean up kwargs - handle ComfyUI's string conversion issues
+            cleaned_kwargs = self._clean_kwargs(kwargs)
+
             # Step 1: Process wildcards if seed is provided
             processed_prompt = prompt
             if wildcard_seed != -1:
@@ -121,17 +124,17 @@ class FluxWildcardEncode:
                 name_key = f"lora_{i}_name"
                 strength_key = f"lora_{i}_strength"
 
-                # Check if this LoRA slot is enabled and has a valid selection
-                lora_enabled = kwargs.get(on_key, False)
-                lora_name = kwargs.get(name_key, "None")
-                lora_strength = kwargs.get(strength_key, 1.0)
+                # Get cleaned values for this LoRA slot
+                lora_enabled = cleaned_kwargs.get(on_key, False)
+                lora_name = cleaned_kwargs.get(name_key, "None")
+                lora_strength = cleaned_kwargs.get(strength_key, 1.0)
 
                 # Validate LoRA configuration and provide feedback
                 if lora_enabled and lora_name != "None":
                     self._validate_lora_config(i, lora_name, lora_strength, lora_warnings)
-                
+
                 if lora_enabled and lora_name and lora_name != "None":
-                    strength = kwargs.get(strength_key, 1.00)
+                    strength = lora_strength
                     
                     # Skip if strength is zero
                     if strength == 0:
@@ -284,3 +287,42 @@ class FluxWildcardEncode:
             print(f"[FluxWildcardEncode] 💡 Pose LoRAs often work better at 0.6-0.9 strength")
         elif "lighting" in lora_lower and strength > 0.8:
             print(f"[FluxWildcardEncode] 💡 Lighting LoRAs typically work best at 0.4-0.7 strength")
+
+
+    def _clean_kwargs(self, kwargs):
+        """Clean kwargs to handle ComfyUI's string conversion issues"""
+        cleaned = {}
+
+        for key, value in kwargs.items():
+            if key.endswith('_on'):
+                # Boolean parameters
+                if isinstance(value, str):
+                    cleaned[key] = value.lower() in ('true', '1', 'yes', 'on')
+                else:
+                    cleaned[key] = bool(value)
+            elif key.endswith('_strength'):
+                # Float parameters
+                if isinstance(value, str):
+                    if value.lower() in ('none', '', 'null'):
+                        cleaned[key] = 1.0  # Default strength
+                    else:
+                        try:
+                            cleaned[key] = float(value)
+                        except ValueError:
+                            cleaned[key] = 1.0  # Default on error
+                else:
+                    cleaned[key] = float(value) if value is not None else 1.0
+            elif key.endswith('_name'):
+                # String parameters (LoRA names)
+                if isinstance(value, str):
+                    if value.lower() in ('false', 'none', '', 'null'):
+                        cleaned[key] = "None"
+                    else:
+                        cleaned[key] = value
+                else:
+                    cleaned[key] = str(value) if value is not None else "None"
+            else:
+                # Other parameters - pass through
+                cleaned[key] = value
+
+        return cleaned

@@ -128,7 +128,7 @@ class BawkSampler:
                 
                 # Latent generation
                 "resolution": (resolution_presets, {
-                    "default": "FHD 16:9 - 1920x1080",
+                    "default": "FHD 16:9 - 1920x1080 - 2.1MP",
                     "tooltip": "Select resolution preset or custom option"
                 }),
                 "batch_size": ("INT", {
@@ -167,9 +167,9 @@ class BawkSampler:
                 }),
                 "denoise": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Denoise strength"
+                    "tooltip": "Denoise strength - Use 1.0 for text-to-image, 0.6-0.9 for image-to-image"
                 }),
-                
+
                 # Custom resolution toggle
                 "use_custom_resolution": ("BOOLEAN", {
                     "default": False,
@@ -177,6 +177,11 @@ class BawkSampler:
                 }),
             },
             "optional": {
+                # Img2Img support
+                "input_image": ("IMAGE", {
+                    "tooltip": "Input image for img2img generation. Leave empty for text-to-image mode."
+                }),
+
                 # Custom resolution (only used when use_custom_resolution=True)
                 "custom_width": ("INT", {
                     "default": 1920, "min": 64, "max": 4096, "step": 64,
@@ -193,30 +198,36 @@ class BawkSampler:
     RETURN_NAMES = ("images", "latent")
     FUNCTION = "generate_sample_and_decode"
     CATEGORY = "BawkNodes/sampling"
-    DESCRIPTION = "Combined latent generator, sampler, and VAE decoder optimized for FLUX models"
+    DESCRIPTION = "All-in-one FLUX sampler with text-to-image and image-to-image support, including VAE decoding"
     
     def generate_sample_and_decode(
         self,
         model, conditioning, vae,
-        resolution="FHD 16:9 - 1920x1080", batch_size=4,
+        resolution="FHD 16:9 - 1920x1080 - 2.1MP", batch_size=4,
         seed=0, sampler="euler", scheduler="beta", steps=30,
         guidance=3.5, max_shift=0.5, base_shift=0.3, denoise=1.0,
-        use_custom_resolution=False, custom_width=1920, custom_height=1080
+        use_custom_resolution=False, input_image=None, custom_width=1920, custom_height=1080
     ):
         """
         Generate optimized latent, perform FLUX sampling, and decode to images
         """
         try:
             # Step 0: Smart validation with user feedback
+            is_img2img = input_image is not None
             self._validate_parameters_with_feedback(
                 model, batch_size, steps, guidance, max_shift, base_shift,
-                resolution, use_custom_resolution, custom_width, custom_height
+                resolution, use_custom_resolution, custom_width, custom_height, is_img2img, denoise
             )
 
-            # Step 1: Generate optimized latent
-            latent = self._generate_optimized_latent(
-                resolution, batch_size, use_custom_resolution, custom_width, custom_height
-            )
+            # Step 1: Generate or encode latent (img2img vs txt2img)
+            if is_img2img:
+                print(f"[BawkSampler] Using img2img mode with denoise strength: {denoise}")
+                latent = self._encode_image_to_latent(vae, input_image, batch_size)
+            else:
+                print(f"[BawkSampler] Using text-to-image mode")
+                latent = self._generate_optimized_latent(
+                    resolution, batch_size, use_custom_resolution, custom_width, custom_height
+                )
 
             # Step 2: Perform sampling
             sampled_latent = self._perform_flux_sampling(
@@ -368,7 +379,7 @@ class BawkSampler:
 
     def _validate_parameters_with_feedback(
         self, model, batch_size, steps, guidance, max_shift, base_shift,
-        resolution, use_custom_resolution, custom_width, custom_height
+        resolution, use_custom_resolution, custom_width, custom_height, is_img2img=False, denoise=1.0
     ):
         """Smart validation with user-friendly feedback and recommendations"""
 
@@ -404,10 +415,22 @@ class BawkSampler:
             elif total_pixels > 2048 * 2048:
                 print(f"[BawkSampler] ℹ️  INFO: High resolution ({custom_width}x{custom_height}) detected. Ensure sufficient VRAM.")
 
+        # Img2Img specific validation
+        if is_img2img:
+            if denoise == 1.0:
+                print(f"[BawkSampler] ℹ️  IMG2IMG: Denoise at 1.0 will completely replace input image. Consider 0.6-0.9 for image modification.")
+            elif denoise < 0.3:
+                print(f"[BawkSampler] ℹ️  IMG2IMG: Very low denoise ({denoise}) may result in minimal changes to input image.")
+            elif denoise > 0.9:
+                print(f"[BawkSampler] ℹ️  IMG2IMG: High denoise ({denoise}) will heavily modify the input image.")
+            else:
+                print(f"[BawkSampler] ✅ IMG2IMG: Good denoise strength ({denoise}) for image modification.")
+
         # Memory estimation and recommendations
         self._estimate_memory_usage(batch_size, resolution, use_custom_resolution, custom_width, custom_height)
 
-        print(f"[BawkSampler] ✅ Validation complete. Proceeding with generation...")
+        mode_str = "img2img" if is_img2img else "text-to-image"
+        print(f"[BawkSampler] ✅ Validation complete. Proceeding with {mode_str} generation...")
 
     def _estimate_memory_usage(self, batch_size, resolution, use_custom_resolution, custom_width, custom_height):
         """Estimate and report memory usage"""
@@ -510,3 +533,37 @@ class BawkSampler:
 
         # Generic fallback
         return (error_msg, "Check the console for detailed error information and ensure all inputs are valid")
+
+    def _encode_image_to_latent(self, vae, input_image, batch_size):
+        """Encode input image to latent for img2img processing"""
+        try:
+            print(f"[BawkSampler] Encoding input image to latent space...")
+
+            # Handle batch size adjustment
+            if len(input_image.shape) == 4:  # Batch dimension exists
+                image_batch_size = input_image.shape[0]
+                if image_batch_size == 1 and batch_size > 1:
+                    # Repeat single image for batch
+                    input_image = input_image.repeat(batch_size, 1, 1, 1)
+                    print(f"[BawkSampler] Expanded single input image to batch size {batch_size}")
+                elif image_batch_size != batch_size:
+                    # Use first image and repeat if needed
+                    input_image = input_image[0:1].repeat(batch_size, 1, 1, 1)
+                    print(f"[BawkSampler] Using first image from batch, expanded to batch size {batch_size}")
+
+            # Encode image to latent using VAE
+            latent_samples = vae.encode(input_image)
+
+            # Create latent dictionary
+            latent = {"samples": latent_samples}
+
+            image_h, image_w = input_image.shape[-2:]
+            latent_h, latent_w = latent_samples.shape[-2:]
+            print(f"[BawkSampler] Encoded image {image_w}x{image_h} to latent {latent_w}x{latent_h}")
+
+            return latent
+
+        except Exception as e:
+            error_msg = f"Failed to encode input image to latent: {str(e)}"
+            print(f"[BawkSampler] Error: {error_msg}")
+            raise RuntimeError(error_msg)

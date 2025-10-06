@@ -4,10 +4,13 @@ File: __init__.py
 """
 
 from .nodes import (
-    DiffusionModelLoader, 
-    FluxImageSaver, 
+    DiffusionModelLoader,
+    FluxImageSaver,
     FluxWildcardEncode,
-    BawkSampler
+    BawkSampler,
+    BawkBatchProcessor,
+    BawkControlNet,
+    BawkImageLoader
 )
 
 NODE_CLASS_MAPPINGS = {
@@ -15,18 +18,24 @@ NODE_CLASS_MAPPINGS = {
     "FluxImageSaver": FluxImageSaver,
     "FluxWildcardEncode": FluxWildcardEncode,
     "BawkSampler": BawkSampler,
+    "BawkBatchProcessor": BawkBatchProcessor,
+    "BawkControlNet": BawkControlNet,
+    "BawkImageLoader": BawkImageLoader,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "DiffusionModelLoader": "🚀 Diffusion Model Loader (Advanced)",
-    "FluxImageSaver": "💾 FLUX Image Saver",
-    "FluxWildcardEncode": "🎲 FLUX Wildcard Encoder",
-    "BawkSampler": "🐓 Bawk Sampler (All-in-One)",
+    "DiffusionModelLoader": "🚀 Bawk Model Loader",
+    "FluxImageSaver": "💾 Bawk Image Saver",
+    "FluxWildcardEncode": "🎲 Bawk Wildcard Encoder",
+    "BawkSampler": "🐓 Bawk Sampler",
+    "BawkBatchProcessor": "📁 Bawk Batch Processor",
+    "BawkControlNet": "🎛️ Bawk ControlNet",
+    "BawkImageLoader": "📸 Bawk Image Loader",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
 
-__version__ = "2.0.4"
+__version__ = "2.0.5"
 __author__ = "Bawk Nodes"
 __description__ = "A complete collection of FLUX-optimized ComfyUI nodes for enhanced workflows"
 
@@ -34,8 +43,11 @@ __description__ = "A complete collection of FLUX-optimized ComfyUI nodes for enh
 print(f"\033[1m\033[92m🐓 ComfyUI Bawk Nodes v{__version__} loaded successfully!\033[0m")
 print(f"\033[1m\033[93m   🎉 Major Update - Complete FLUX Workflow Suite!\033[0m")
 print(f"\033[1m\033[96m   Current nodes:\033[0m")
-print(f"\033[94m   • 🚀  Diffusion Model Loader (Advanced) - FLUX-optimized model loading\033[0m")
-print(f"\033[95m   • 🎲  FLUX Wildcard Encoder - Text encoding with wildcard support and 6 LoRA slots\033[0m")
-print(f"\033[92m   • 💾  FLUX Image Saver - Organized image saving with metadata and prompt files\033[0m")
-print(f"\033[91m   • 🐓  Bawk Sampler (All-in-One) - Combined latent optimizer and sampler\033[0m")
+print(f"\033[94m   • 🚀  Bawk Model Loader - FLUX-optimized model loading with advanced caching\033[0m")
+print(f"\033[95m   • 🎲  Bawk Wildcard Encoder - Text encoding, wildcards & 6 LoRA slots\033[0m")
+print(f"\033[92m   • 💾  Bawk Image Saver - Organized saving with metadata, prompts & Discord webhooks\033[0m")
+print(f"\033[91m   • 🐓  Bawk Sampler - All-in-one text2img and img2img sampler with VAE decoding\033[0m")
+print(f"\033[93m   • 📁  Bawk Batch Processor - Process multiple prompts from CSV/JSON files\033[0m")
+print(f"\033[96m   • 🎛️  Bawk ControlNet - FLUX-optimized ControlNet preprocessing\033[0m")
+print(f"\033[97m   • 📸  Bawk Image Loader - Enhanced image loading with preprocessing\033[0m")
 print(f"\033[3m\033[96m   • 📦  Modular architecture for easy maintenance and debugging\033[0m")

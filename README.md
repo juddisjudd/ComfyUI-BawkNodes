@@ -1,332 +1,173 @@
 <div align="center">
-<h1>🐓 ComfyUI Bawk Nodes v2.0.4</h1>
+<h1>ComfyUI Bawk Nodes v2.0.5</h1>
 
-**A collection of FLUX-optimized ComfyUI nodes for efficient AI image generation.**
+**The Ultimate FLUX Workflow Suite for ComfyUI**
+
+*Transform your AI image generation with powerful, easy-to-use nodes designed specifically for FLUX models*
+
+[![ComfyUI](https://img.shields.io/badge/ComfyUI-Compatible-brightgreen)](https://github.com/comfyanonymous/ComfyUI)
+[![FLUX](https://img.shields.io/badge/FLUX-Optimized-blue)](https://blackforestlabs.ai/)
+[![Version](https://img.shields.io/badge/Version-2.0.5-orange)]()
 
 </div>
 
-![Image Description](previews/efficient-workflow-preview.png)
+---
+
+## **Why Choose Bawk Nodes?**
+
+### **All-in-One Workflow Solutions**
+- **No more node spaghetti!** Each Bawk Node combines multiple functions into clean, powerful tools
+- **FLUX-first design** - Every node is optimized specifically for FLUX models
+- **Professional results** with minimal setup time
+
+### **Perfect For:**
+- **Content Creators** - Instagram, TikTok, and social media workflows
+- **Artists & Designers** - Professional image generation and experimentation
+- **Hobbyists** - Easy-to-use tools without complicated setups
+- **Power Users** - Advanced features like batch processing and Discord integration
 
 ---
 
-## 🎯 **What's New in v2.0.4**
+## **What You Get**
 
-**Major Rewrite**: Complete FLUX-first redesign with modular architecture and workflow consolidation.
+### **Bawk Image Loader**
+*Your gateway to img2img workflows*
+- **Click to browse** - No more typing file paths!
+- **Auto-rotation** - Handles phone photos perfectly
+- **Smart resizing** - Perfect dimensions every time
+- **Multiple formats** - JPG, PNG, WEBP, and more
 
-- 🎲 **Enhanced Wildcard Encoder** with 6 LoRA slots
-- 🐓 **All-in-One BawkSampler** with integrated VAE decoding
-- 📁 **Modular Architecture** for better maintainability
-- ⚡ **Streamlined Workflows** - fewer nodes, more power
-- 💾 **Enhanced Image Saver** with prompt saving
+### **Bawk Wildcard Encoder**
+*Text prompts + LoRAs made simple*
+- **6 LoRA slots** with smart recommendations
+- **Wildcard support** - Randomize your prompts
+- **Helpful tooltips** - Know exactly what each setting does
+- **FLUX-optimized** text encoding
+
+### **Bawk Sampler**
+*The heart of your workflow*
+- **Text-to-Image & Image-to-Image** in one node
+- **Resolution presets** - Instagram, TikTok, 4K, and more
+- **Smart validation** - Helpful tips and warnings
+- **All-in-one** - Generates, samples, and decodes in one step
+
+### **Bawk Image Saver**
+*Save and share like a pro*
+- **Organized folders** by model and date
+- **Discord integration** - Auto-post your creations
+- **Batch support** - Upload multiple images at once
+- **Metadata saving** - Never lose your settings
+
+### **Bawk Batch Processor**
+*Automate your workflow*
+- **CSV/JSON support** - Process hundreds of prompts
+- **A/B testing** - Compare different settings easily
+- **Preview mode** - Check your files before processing
+- **Perfect for** content creation at scale
+
+### **Bawk ControlNet**
+*Guided generation made easy*
+- **Built-in preprocessing** - Canny, depth, pose, and more
+- **No external tools needed** - Everything works out of the box
+- **FLUX-optimized** control strength recommendations
+- **Multiple control types** in one node
+
+### **Bawk Model Loader**
+*Advanced model management*
+- **Smart caching** - Faster loading times
+- **Memory optimization** - Handle large models efficiently
+- **Validation** - Helpful warnings for compatibility issues
+- **FLUX-specific** optimizations
 
 ---
 
-## 🚀 **Node Collection Overview**
+## **Quick Start Guide**
 
-| Node | Description | Category |
-|------|-------------|----------|
-| 🚀 **Diffusion Model Loader** | Advanced FLUX-optimized model loading | Loaders |
-| 🎲 **FLUX Wildcard Encoder** | Text encoding + 6 LoRA slots + wildcards | Conditioning |
-| 🐓 **Bawk Sampler** | All-in-one latent generation, sampling & VAE decode | Sampling |
-| 💾 **FLUX Image Saver** | Organized saving with metadata & prompt files | Image |
-| 📝 **FLUX Prompt Saver** | Standalone prompt archiving | Text |
+### **1. Basic Text-to-Image Workflow**
+```
+Bawk Model Loader → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
+```
+
+### **2. Image-to-Image Workflow**
+```
+Bawk Image Loader → Bawk Sampler → Bawk Image Saver
+                   ↗ (set denoise 0.6-0.8)
+```
+
+### **3. Batch Generation Workflow**
+```
+Bawk Batch Processor → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
+```
 
 ---
 
-## 🔥 **Complete FLUX Workflow**
+## **Popular Use Cases**
 
-**Before BawkNodes (5+ nodes):**
-```
-CheckpointLoader → LoraLoader → CLIPTextEncode → EmptyLatent → KSampler → VAEDecode → SaveImage
-```
+### **Social Media Content**
+- Use **Instagram presets** in Bawk Sampler (1080x1080, 1080x1920)
+- Set up **Discord webhooks** to auto-post to your content channels
+- **Batch process** multiple variations for A/B testing
 
-**After BawkNodes (3 nodes):**
-```
-🚀 DiffusionModelLoader → 🎲 FluxWildcardEncode → 🐓 BawkSampler → 💾 FluxImageSaver
-```
+### **Art & Design**
+- Load reference images with **Bawk Image Loader**
+- Use **LoRA slots** for consistent character/style
+- Try **different denoise levels** for style transfer effects
 
-**60% fewer nodes, 100% of the power!**
+### **Workflow Automation**
+- Create **CSV files** with prompts and settings
+- Use **Bawk Batch Processor** for unattended generation
+- **Discord integration** notifies you when batches complete
 
 ---
 
-## 📦 **Installation**
+## **Pro Tips**
 
-### Method 1: ComfyUI Manager (Recommended)
+### **LoRA Management**
+- **Slot 1**: Main character/style (strength 0.8-1.2)
+- **Slot 2**: Secondary effects (strength 0.6-1.0)
+- **Slot 3**: Clothing/objects (strength 0.4-0.8)
+- **Slots 4-6**: Fine details and adjustments (strength 0.2-0.6)
+
+### **Denoise Settings for Img2Img**
+- **0.3-0.5**: Subtle improvements, keep original structure
+- **0.6-0.7**: Style changes, good balance
+- **0.8-0.9**: Major transformations
+- **1.0**: Complete replacement (text2img mode)
+
+### **Batch Processing**
+Create a CSV file like this:
+```csv
+prompt,seed,steps,guidance,resolution
+"beautiful sunset",12345,30,3.5,"Instagram Square - 1080x1080 - 1.2MP"
+"city at night",67890,25,4.0,"Instagram Story - 1080x1920 - 2.1MP"
+```
+
+---
+
+## **Installation**
+
+### **Method 1: ComfyUI Manager (Recommended)**
 1. Open ComfyUI Manager
 2. Search for "Bawk Nodes"
 3. Click Install
 4. Restart ComfyUI
 
-### Method 2: Manual Installation
-```bash
-cd ComfyUI/custom_nodes
-git clone https://github.com/juddisjudd/ComfyUI-BawkNodes.git
-# Restart ComfyUI
-```
+### **Method 2: Manual Installation**
+1. Navigate to `ComfyUI/custom_nodes/`
+2. Clone this repository:
+   ```bash
+   git clone https://github.com/juddisjudd/ComfyUI-BawkNodes.git
+   ```
+3. Restart ComfyUI
 
 ---
 
-## 🎲 **Node Details**
+## **Community & Support**
 
-### 🚀 **Diffusion Model Loader (Advanced)**
-
-**FLUX-optimized model loading with advanced features.**
-
-**Features:**
-- Multiple model formats (FLUX, SDXL, SD1.5)
-- Flexible weight data types (fp8, fp16, bf16, fp32)
-- Separate VAE and CLIP loading
-- Multiple directory support
-
-**Inputs:**
-- `model_name` - Model from diffusion_models folder
-- `vae_name` - VAE or "baked VAE"
-- `clip_name1/2` - CLIP models for FLUX
-- `weight_dtype` - Precision optimization
-
-**Outputs:** `MODEL`, `VAE`, `CLIP`, `MODEL_STRING`
+- **Issues & Feature Requests**: [GitHub Issues](https://github.com/juddisjudd/ComfyUI-BawkNodes/issues)
 
 ---
 
-### 🎲 **FLUX Wildcard Encoder**
+## **License**
 
-**Enhanced text encoder with 6 LoRA slots and wildcard support.**
-
-**Features:**
-- **Wildcard Processing**: `{option1|option2|option3}` syntax
-- **6 LoRA Slots**: Individual enable/disable toggles
-- **Fuzzy LoRA Matching**: Flexible file resolution
-- **FLUX Optimization**: 16-channel conditioning
-
-**Inputs:**
-- `model`, `clip` - From model loader
-- `prompt` - Text with wildcard support
-- `wildcard_seed` - Seed for consistent wildcard selection
-- `lora_X_on` - Enable/disable each LoRA (X = 1-6)
-- `lora_X_name` - LoRA selection dropdown
-- `lora_X_strength` - Strength adjustment (-10.0 to +10.0)
-
-**Outputs:** `MODEL`, `CLIP`, `CONDITIONING`, `PROMPT_OUT`
-
-**Example Prompt with Wildcards:**
-```
-A {beautiful|stunning|gorgeous} {cat|dog|bird} in a {forest|garden|meadow}, 
-{photorealistic|artistic|stylized} style
-```
-
----
-
-### 🐓 **Bawk Sampler (All-in-One)**
-
-**Complete latent generation, sampling, and VAE decoding in one node.**
-
-**Features:**
-- **Smart Resolution Presets**: Pre-configured FLUX-optimized resolutions
-- **Custom Resolution Support**: Manual width/height with 64px alignment
-- **Advanced FLUX Sampling**: All FLUX-specific parameters
-- **Integrated VAE Decoding**: Direct image output
-- **Batch Generation**: Up to 64 images at once
-
-**Key Inputs:**
-- `model`, `conditioning`, `vae` - From previous nodes
-- `resolution` - Smart presets or custom
-- `batch_size` - Number of images (default: 4)
-- `sampler` - Sampling method (default: euler)
-- `scheduler` - Noise schedule (default: beta)
-- `steps` - Sampling steps (default: 30)
-- `guidance` - FLUX guidance scale (default: 3.5)
-- `max_shift` - FLUX max shift (default: 0.5)
-- `base_shift` - FLUX base shift (default: 0.3)
-
-**Resolution Presets:**
-- `FHD 16:9 - 1920x1080` (default)
-- `Medium Square - 1024x1024`
-- `Portrait 9:16 - 1080x1920`
-- `Ultra-wide - 1792x768`
-- And many more...
-
-**Outputs:** `IMAGE`, `LATENT`
-
----
-
-### 💾 **FLUX Image Saver**
-
-**Organized image saving with metadata and prompt archiving.**
-
-**Features:**
-- **Smart Folder Organization**: `[MODEL]-DD-MM-YYYY` structure
-- **Multiple Formats**: PNG, JPG, WebP support
-- **Metadata Embedding**: PNG metadata support
-- **Prompt File Saving**: Separate `.txt` files with processed prompts
-- **JSON Metadata**: Complete generation parameters
-
-**Inputs:**
-- `images` - From BawkSampler
-- `model_string` - From model loader
-- `processed_prompt` - From wildcard encoder
-- `save_prompt` - Enable prompt file saving (default: True)
-- `format` - Image format (PNG/JPG/WebP)
-- `quality` - Compression quality (1-100)
-
-**File Output Example:**
-```
-ComfyUI/output/[FLUX_Model]-01-08-2025/
-├── flux_image_01-08-2025_14-30-15_001.png
-├── flux_image_01-08-2025_14-30-15_002.png
-├── flux_image_01-08-2025_14-30-15_prompt.txt
-├── flux_image_01-08-2025_14-30-15_001_metadata.json
-└── flux_image_01-08-2025_14-30-15_002_metadata.json
-```
-
----
-
-### 📝 **FLUX Prompt Saver**
-
-**Standalone prompt and parameter archiving.**
-
-**Features:**
-- **JSON Format**: Structured data storage
-- **Complete Parameters**: All generation settings
-- **Organized Storage**: Matches image saver folder structure
-- **Workflow Integration**: Links with other BawkNodes
-
----
-
-## 🛠️ **Advanced Usage**
-
-### **Wildcard Examples**
-
-**Basic Wildcards:**
-```
-A {red|blue|green} car in the {city|countryside}
-```
-
-**Nested Concepts:**
-```
-{A majestic|An elegant|A powerful} {dragon|phoenix|griffin} 
-{soaring through|perched upon|emerging from} {clouds|mountains|flames}
-```
-
-**Style Variations:**
-```
-Portrait of a woman, {photorealistic|oil painting|digital art|watercolor} style,
-{studio lighting|natural lighting|dramatic lighting}
-```
-
-### **LoRA Management**
-
-**Best Practices:**
-1. **Enable LoRAs individually** for precise control
-2. **Use strength between 0.5-1.5** for most LoRAs
-3. **Combine complementary LoRAs** (style + subject)
-4. **Test different combinations** for unique results
-
-**Example LoRA Setup:**
-- LoRA 1: `realistic_skin_v2.safetensors` (0.8)
-- LoRA 2: `dramatic_lighting.safetensors` (0.6)
-- LoRA 3: `detail_enhancer.safetensors` (0.4)
-
-### **Resolution Guidelines**
-
-**Recommended Presets:**
-- **Square**: `Medium Square - 1024x1024`
-- **Landscape**: `FHD 16:9 - 1920x1080`
-- **Portrait**: `Portrait 9:16 - 1080x1920`
-- **Widescreen**: `Ultra-wide - 1792x768`
-
-**Custom Resolution Rules:**
-- Must be multiples of 64 pixels
-- Keep total pixel count reasonable (<4MP for speed)
-- Consider VRAM limitations for large batches
-
----
-
-## 🔧 **Configuration**
-
-### **Model Setup**
-
-1. **FLUX Models**: Place in `models/diffusion_models/`
-2. **VAE Files**: Place in `models/vae/`
-3. **CLIP Models**: Place in `models/text_encoders/`
-4. **LoRA Files**: Place in `models/loras/`
-
-### **Recommended Settings**
-
-**For Speed:**
-- Resolution: `Medium Square - 1024x1024`
-- Batch Size: `4`
-- Steps: `20-25`
-- Sampler: `euler`
-
-**For Quality:**
-- Resolution: `FHD 16:9 - 1920x1080`
-- Batch Size: `1-2`
-- Steps: `30-40`
-- Sampler: `dpmpp_2m`
-
-**For Experimentation:**
-- Use wildcards with high variation
-- Enable multiple LoRAs
-- Try different guidance scales (2.0-5.0)
-
----
-
-## **Troubleshooting**
-
-### **Common Issues**
-
-**Node Not Appearing:**
-```bash
-# Check ComfyUI console for errors
-# Ensure all files are in correct directories
-# Restart ComfyUI completely
-```
-
-**LoRA Not Loading:**
-- Check file is in `models/loras/`
-- Verify file isn't corrupted
-- Check console for specific error messages
-
-**Memory Issues:**
-- Reduce batch size
-- Use lower resolution
-- Enable `fp8` weight dtype in loader
-
-**Generation Errors:**
-- Verify all connections are correct
-- Check that VAE is connected to BawkSampler
-- Ensure CLIP and MODEL are from same loader
-
-### **Performance Optimization**
-
-**VRAM Usage:**
-- Use `fp8_e4m3fn_fast` for weight dtype
-- Reduce batch size for large images
-- Close other GPU applications
-
-**Speed Improvements:**
-- Use `euler` sampler with `beta` scheduler
-- Reduce step count (20-30 is often sufficient)
-- Use medium resolution presets
-
----
-
-## 📄 **License**
-
-GPL-3.0 license - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 **Acknowledgments**
-- **[rgthree](https://github.com/rgthree/rgthree-comfy)** - Inspiration for dynamic UI patterns
-
----
-
-## 🔗 **Links**
-
-- **Comfy Registry**: [Comfy-Registry](https://registry.comfy.org/publishers/judd/nodes/comfyui-bawknodes)
-- **Issues**: [Report Bugs](https://github.com/juddisjudd/ComfyUI-BawkNodes/issues)
-
----
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P57KRR9)
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
