@@ -8,8 +8,11 @@ import json
 import re
 import numpy as np
 import folder_paths
+import requests
+import io
+import base64
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 class FluxImageSaver:
@@ -29,6 +32,8 @@ class FluxImageSaver:
                 "quality": ("INT", {"default": 95, "min": 1, "max": 100}),
                 "save_metadata": ("BOOLEAN", {"default": True}),
                 "save_prompt": ("BOOLEAN", {"default": True, "tooltip": "Save the processed prompt as a separate text file"}),
+                "send_to_discord": ("BOOLEAN", {"default": False, "tooltip": "Send images to Discord via webhook"}),
+                "discord_webhook_url": ("STRING", {"default": "", "tooltip": "Discord webhook URL (only used when send_to_discord is True)"}),
             },
             "hidden": {
                 "prompt_hidden": "PROMPT",
@@ -41,14 +46,15 @@ class FluxImageSaver:
     FUNCTION = "save_images"
     CATEGORY = "BawkNodes/image"
     OUTPUT_NODE = True
-    DESCRIPTION = "Save FLUX-generated images with organized folder structure"
+    DESCRIPTION = "Save FLUX-generated images with organized folder structure and optional Discord webhook integration"
     
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
         self.type = "output"
     
-    def save_images(self, images, model_string, processed_prompt, prefix="flux_image", 
+    def save_images(self, images, model_string, processed_prompt, prefix="flux_image",
                    format="png", quality=95, save_metadata=True, save_prompt=True,
+                   send_to_discord=False, discord_webhook_url="",
                    prompt_hidden=None, extra_pnginfo=None):
         """
         Save images with FLUX-optimized organization and metadata
@@ -133,7 +139,14 @@ class FluxImageSaver:
                                       model_string, format, quality, processed_prompt)
             
             print(f"[FluxImageSaver] Returning {len(results)} images for preview")
-            
+
+            # Send to Discord if enabled
+            if send_to_discord and discord_webhook_url.strip():
+                try:
+                    self._send_to_discord(saved_paths, discord_webhook_url, processed_prompt, model_string)
+                except Exception as e:
+                    print(f"[FluxImageSaver] Discord webhook failed: {str(e)}")
+
             return {"ui": {"images": results}}
             
         except Exception as e:
@@ -201,3 +214,90 @@ class FluxImageSaver:
             
         except Exception as e:
             print(f"[FluxImageSaver] Failed to save metadata: {str(e)}")
+
+    def _send_to_discord(self, image_paths: List[str], webhook_url: str, prompt: str, model: str):
+        """Send images to Discord via webhook with batch support"""
+        if not webhook_url or not image_paths:
+            return
+
+        print(f"[FluxImageSaver] Sending {len(image_paths)} images to Discord")
+
+        # Prepare the embed with generation info
+        embed = {
+            "title": "🎨 New AI Generation",
+            "description": f"**Model:** {model}\n**Prompt:** {prompt[:1000]}{'...' if len(prompt) > 1000 else ''}",
+            "color": 0x5865F2,  # Discord blurple
+            "timestamp": datetime.now().isoformat(),
+            "footer": {"text": "Generated with ComfyUI BawkNodes"}
+        }
+
+        # Discord has a limit of 10 files per message, so we'll batch them
+        max_files_per_message = 10
+        for i in range(0, len(image_paths), max_files_per_message):
+            batch_paths = image_paths[i:i + max_files_per_message]
+            self._send_discord_batch(webhook_url, batch_paths, embed if i == 0 else None, i // max_files_per_message + 1)
+
+    def _send_discord_batch(self, webhook_url: str, image_paths: List[str], embed: dict = None, batch_num: int = 1):
+        """Send a batch of images to Discord"""
+        try:
+            files = {}
+            payload = {}
+
+            # Add embed only to first batch
+            if embed:
+                payload["embeds"] = [embed]
+
+            # Add batch info if multiple batches
+            if batch_num > 1:
+                payload["content"] = f"📎 Batch {batch_num} of images"
+
+            # Prepare files for upload
+            for idx, image_path in enumerate(image_paths):
+                if not os.path.exists(image_path):
+                    print(f"[FluxImageSaver] Warning: Image file not found: {image_path}")
+                    continue
+
+                try:
+                    with open(image_path, 'rb') as f:
+                        file_data = f.read()
+
+                    filename = os.path.basename(image_path)
+                    files[f'file{idx}'] = (filename, file_data, self._get_content_type(image_path))
+
+                except Exception as e:
+                    print(f"[FluxImageSaver] Failed to read image {image_path}: {str(e)}")
+                    continue
+
+            if not files:
+                print(f"[FluxImageSaver] No valid images to send in batch {batch_num}")
+                return
+
+            # Send to Discord
+            response = requests.post(
+                webhook_url,
+                data={"payload_json": json.dumps(payload)} if payload else None,
+                files=files,
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                print(f"[FluxImageSaver] Successfully sent batch {batch_num} with {len(files)} images to Discord")
+            else:
+                print(f"[FluxImageSaver] Discord webhook failed for batch {batch_num}: {response.status_code} - {response.text}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"[FluxImageSaver] Network error sending to Discord: {str(e)}")
+        except Exception as e:
+            print(f"[FluxImageSaver] Unexpected error sending to Discord: {str(e)}")
+
+    def _get_content_type(self, image_path: str) -> str:
+        """Get the appropriate content type for the image"""
+        ext = os.path.splitext(image_path)[1].lower()
+        content_types = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif'
+        }
+        return content_types.get(ext, 'image/png')
