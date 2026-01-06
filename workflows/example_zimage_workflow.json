@@ -1,0 +1,342 @@
+{
+  "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "ZImageModelLoader",
+      "pos": [
+        100,
+        200
+      ],
+      "size": [
+        350,
+        150
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            3
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "MODEL_STRING",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "Node name for S&R": "ZImageModelLoader"
+      },
+      "widgets_values": [
+        "z-image-turbo.safetensors",
+        "ae.safetensors",
+        "none",
+        "bf16"
+      ],
+      "shape": 1
+    },
+    {
+      "id": 2,
+      "type": "FluxWildcardEncode",
+      "pos": [
+        500,
+        200
+      ],
+      "size": [
+        400,
+        550
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": null,
+          "slot_index": 1
+        },
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            5
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "PROMPT_OUT",
+          "type": "STRING",
+          "links": [
+            7
+          ],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "Node name for S&R": "FluxWildcardEncode"
+      },
+      "widgets_values": [
+        "A stunning {portrait|landscape} photograph of a {mountain lake|forest clearing|coastal cliff} at {golden hour|blue hour|sunrise}, professional photography, 8K resolution, sharp focus, dramatic lighting",
+        42,
+        false,
+        "None",
+        1.0,
+        false,
+        "None",
+        1.0,
+        false,
+        "None",
+        1.0,
+        false,
+        "None",
+        1.0,
+        false,
+        "None",
+        1.0,
+        false,
+        "None",
+        1.0
+      ],
+      "shape": 1
+    },
+    {
+      "id": 3,
+      "type": "BawkSampler",
+      "pos": [
+        950,
+        200
+      ],
+      "size": [
+        320,
+        550
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 4
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3
+        },
+        {
+          "name": "input_image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            8
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": null,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "Node name for S&R": "BawkSampler"
+      },
+      "widgets_values": [
+        "FLUX Optimal - 1024x1024 - 1.0MP ⭐ Recommended",
+        4,
+        12345,
+        "randomize",
+        "euler",
+        "beta",
+        8,
+        0.0,
+        1.15,
+        0.5,
+        1.0,
+        false,
+        1920,
+        1080
+      ],
+      "shape": 1
+    },
+    {
+      "id": 4,
+      "type": "FluxImageSaver",
+      "pos": [
+        1320,
+        200
+      ],
+      "size": [
+        380,
+        320
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        },
+        {
+          "name": "model_string",
+          "type": "STRING",
+          "link": 6
+        },
+        {
+          "name": "processed_prompt",
+          "type": "STRING",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "Node name for S&R": "FluxImageSaver"
+      },
+      "widgets_values": [
+        "zimage_output",
+        "png",
+        95,
+        true,
+        true,
+        false,
+        ""
+      ],
+      "shape": 1
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [
+        1320,
+        570
+      ],
+      "size": [
+        380,
+        300
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "shape": 1
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "MODEL"],
+    [2, 1, 2, 2, 1, "CLIP"],
+    [3, 1, 1, 3, 2, "VAE"],
+    [4, 2, 0, 3, 0, "MODEL"],
+    [5, 2, 2, 3, 1, "CONDITIONING"],
+    [6, 1, 3, 4, 1, "STRING"],
+    [7, 2, 3, 4, 2, "STRING"],
+    [8, 3, 0, 4, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Z-Image Turbo Text-to-Image Workflow (8 steps, no CFG)",
+      "bounding": [
+        50,
+        100,
+        1700,
+        800
+      ],
+      "color": "#1a3232",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9,
+      "offset": [0, 0]
+    },
+    "info": {
+      "name": "BawkNodes Z-Image Example Workflow",
+      "description": "Z-Image-Turbo text-to-image workflow - 8 steps, no CFG (guidance=0.0), same structure as FLUX workflow.",
+      "author": "BawkNodes",
+      "version": "2.3.0"
+    }
+  },
+  "version": 0.4
+}

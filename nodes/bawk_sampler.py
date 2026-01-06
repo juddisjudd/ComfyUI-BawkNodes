@@ -68,39 +68,31 @@ class BawkSampler:
     @classmethod
     def INPUT_TYPES(cls):
         # FLUX-optimized resolution presets based on official limits and community testing
-        # Official FLUX range: 0.1MP (512x512) to 2.0MP (1408x1408 square / 1920x1080 wide)
-        # Beyond 2.0MP: Unstable, may require upscaling post-processing
+        # Official FLUX range: 0.1MP (512x512) to 2.0MP (1408x1408)
+        # For higher resolutions, generate at 1408x1408 then use FLUX upscaler
         resolution_presets = [
-            # OPTIMAL SWEET SPOTS (Best quality/speed balance - Official FLUX range)
-            "FLUX Optimal - 1024x1024 - 1.0MP (Recommended)",
+            # OPTIMAL SWEET SPOTS (Best quality/speed balance)
+            "FLUX Optimal - 1024x1024 - 1.0MP ⭐ Recommended",
             "Fast Portrait - 768x1024 - 0.8MP (3:4)",
             "Fast Landscape - 1024x768 - 0.8MP (4:3)",
 
-            # QUICK TESTING (Minimum viable resolution)
-            "Quick Test - 512x512 - 0.25MP (Minimum - Draft mode)",
+            # QUICK TESTING
+            "Quick Test - 512x512 - 0.25MP (Draft mode)",
 
-            # OFFICIAL MAXIMUM RESOLUTION (2.0MP limit)
-            "FLUX Max Square - 1408x1408 - 2.0MP (Official maximum)",
-            "FLUX Max Wide - 1920x1080 - 2.1MP (Near official limit - May be unstable)",
+            # OFFICIAL MAXIMUM (Best for detail)
+            "FLUX Max Quality - 1408x1408 - 2.0MP (Highest stable)",
 
-            # SOCIAL MEDIA FORMATS (Within official range)
+            # SOCIAL MEDIA FORMATS
             "Instagram Square - 1024x1024 - 1.0MP (1:1)",
             "Instagram Portrait - 1024x1280 - 1.3MP (4:5)",
-            "TikTok Vertical - 1088x1920 - 2.1MP (9:16 - Near limit)",
+            "Twitter Post - 1200x675 - 0.8MP (16:9)",
 
-            # STABLE ALTERNATIVES (Well within official range)
-            "Square Medium - 832x832 - 0.7MP (1:1)",
+            # STABLE ALTERNATIVES
+            "Square Medium - 832x832 - 0.7MP",
             "Portrait Classic - 768x1024 - 0.8MP (3:4)",
             "Landscape Classic - 1024x768 - 0.8MP (4:3)",
             "Wide Screen - 1152x768 - 0.9MP (3:2)",
             "Print Quality - 1344x896 - 1.2MP (3:2)",
-
-            # EXPERIMENTAL (Beyond official 2.0MP - May be unstable)
-            "⚠️ Experimental Square - 1536x1536 - 2.4MP (May need upscaler)",
-            "⚠️ Experimental Wide - 1792x1024 - 1.8MP (May need upscaler)",
-
-            # EXTREME (4.0MP+ - Unstable, requires post-processing)
-            "⚠️ Extreme 4MP - 2048x2048 - 4.2MP (Unstable - Use upscaler)",
 
             # Custom option
             "Custom Resolution",
@@ -137,20 +129,20 @@ class BawkSampler:
                     "tooltip": "Noise scheduling method"
                 }),
                 "steps": ("INT", {
-                    "default": 28, "min": 1, "max": 100, "step": 1,
-                    "tooltip": "Sampling steps - Sweet spot: 25-30 (community tested for quality/speed balance)"
+                    "default": 30, "min": 1, "max": 100, "step": 1,
+                    "tooltip": "Sampling steps - FLUX optimal: 30 (20=fast, 40=quality)"
                 }),
                 "guidance": ("FLOAT", {
                     "default": 3.5, "min": 0.0, "max": 20.0, "step": 0.1,
-                    "tooltip": "Guidance scale for FLUX"
+                    "tooltip": "Guidance scale - FLUX recommended: 3.5 (balanced), 2.0 (creative), 7.0 (structured)"
                 }),
                 "max_shift": ("FLOAT", {
-                    "default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01,
-                    "tooltip": "Max shift parameter for FLUX"
+                    "default": 1.15, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "tooltip": "Max shift for FLUX - 1.15 is optimal (higher=more coherent, lower=more varied)"
                 }),
                 "base_shift": ("FLOAT", {
-                    "default": 0.3, "min": 0.0, "max": 2.0, "step": 0.01,
-                    "tooltip": "Base shift parameter for FLUX"
+                    "default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "tooltip": "Base shift for FLUX - 0.5 is optimal for most cases"
                 }),
                 "denoise": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
@@ -185,7 +177,7 @@ class BawkSampler:
     RETURN_NAMES = ("images", "latent")
     FUNCTION = "generate_sample_and_decode"
     CATEGORY = "BawkNodes/sampling"
-    DESCRIPTION = "All-in-one FLUX sampler with text-to-image and image-to-image support, including VAE decoding"
+    DESCRIPTION = "🐓 All-in-one FLUX sampler with txt2img/img2img, smart validation, and built-in VAE decoding"
     
     def generate_sample_and_decode(
         self,

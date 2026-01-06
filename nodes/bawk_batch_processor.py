@@ -34,6 +34,7 @@ class BawkBatchProcessor:
             "required": {
                 "batch_file": ("STRING", {
                     "default": "",
+                    "dynamicPrompts": False,
                     "tooltip": "Path to CSV or JSON file with batch settings. CSV columns: prompt, seed, steps, guidance, etc."
                 }),
                 "file_format": (["Auto-detect", "CSV", "JSON"], {
@@ -53,6 +54,7 @@ class BawkBatchProcessor:
                 # Override defaults
                 "default_resolution": ("STRING", {
                     "default": "FHD 16:9 - 1920x1080 - 2.1MP",
+                    "dynamicPrompts": False,
                     "tooltip": "Default resolution for items that don't specify one"
                 }),
                 "default_steps": ("INT", {
@@ -70,7 +72,7 @@ class BawkBatchProcessor:
     RETURN_NAMES = ("prompt", "seed", "steps", "guidance", "resolution", "batch_info")
     FUNCTION = "process_batch"
     CATEGORY = "BawkNodes/batch"
-    DESCRIPTION = "Process prompts and settings from CSV/JSON files for batch generation"
+    DESCRIPTION = "📁 Batch processor - load prompts and settings from CSV/JSON files for automated generation workflows"
 
     def process_batch(
         self,

@@ -72,7 +72,7 @@ class BawkImageLoader:
     RETURN_NAMES = ("image", "mask", "filename", "width", "height")
     FUNCTION = "load_image"
     CATEGORY = "BawkNodes/image"
-    DESCRIPTION = "Enhanced image loader with file browser, preprocessing, and mask support"
+    DESCRIPTION = "📸 Enhanced image loader with auto-rotation, smart resizing, and mask generation"
 
     @classmethod
     def IS_CHANGED(cls, image, **kwargs):

@@ -27,13 +27,20 @@ class FluxImageSaver:
                 "images": ("IMAGE",),
                 "model_string": ("STRING", {"forceInput": True}),
                 "processed_prompt": ("STRING", {"forceInput": True}),  # Connect from wildcard encoder
-                "prefix": ("STRING", {"default": "flux_image"}),
+                "prefix": ("STRING", {
+                    "default": "flux_image",
+                    "dynamicPrompts": False
+                }),
                 "format": (["png", "jpg", "webp"], {"default": "png"}),
                 "quality": ("INT", {"default": 95, "min": 1, "max": 100}),
                 "save_metadata": ("BOOLEAN", {"default": True}),
                 "save_prompt": ("BOOLEAN", {"default": True, "tooltip": "Save the processed prompt as a separate text file"}),
                 "send_to_discord": ("BOOLEAN", {"default": False, "tooltip": "Send images to Discord via webhook"}),
-                "discord_webhook_url": ("STRING", {"default": "", "tooltip": "Discord webhook URL (only used when send_to_discord is True)"}),
+                "discord_webhook_url": ("STRING", {
+                    "default": "",
+                    "dynamicPrompts": False,
+                    "tooltip": "Discord webhook URL (only used when send_to_discord is True)"
+                }),
             },
             "hidden": {
                 "prompt_hidden": "PROMPT",
@@ -46,7 +53,7 @@ class FluxImageSaver:
     FUNCTION = "save_images"
     CATEGORY = "BawkNodes/image"
     OUTPUT_NODE = True
-    DESCRIPTION = "Save FLUX-generated images with organized folder structure and optional Discord webhook integration"
+    DESCRIPTION = "💾 Organized image saving with metadata, prompt files, and Discord webhook support"
     
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()

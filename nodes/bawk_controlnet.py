@@ -85,7 +85,7 @@ class BawkControlNet:
     RETURN_NAMES = ("control_image", "control_conditioning", "control_info")
     FUNCTION = "process_controlnet"
     CATEGORY = "BawkNodes/control"
-    DESCRIPTION = "FLUX-optimized ControlNet preprocessing and integration"
+    DESCRIPTION = "🎛️ ControlNet preprocessing with Canny, depth, pose detection and more"
 
     def process_controlnet(
         self,

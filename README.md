@@ -1,13 +1,14 @@
 <div align="center">
-<h1>ComfyUI Bawk Nodes v2.1.0</h1>
+<h1>ComfyUI Bawk Nodes v2.3.0</h1>
 
-**The Ultimate FLUX Workflow Suite for ComfyUI**
+**The Ultimate FLUX & Z-Image Workflow Suite for ComfyUI**
 
-*Transform your AI image generation with powerful, easy-to-use nodes designed specifically for FLUX models*
+*Transform your AI image generation with powerful, easy-to-use nodes designed for FLUX and Z-Image models*
 
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-Compatible-brightgreen)](https://github.com/comfyanonymous/ComfyUI)
 [![FLUX](https://img.shields.io/badge/FLUX-Optimized-blue)](https://blackforestlabs.ai/)
-[![Version](https://img.shields.io/badge/Version-2.1.0-orange)]()
+[![Z-Image](https://img.shields.io/badge/Z--Image-Supported-cyan)](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo)
+[![Version](https://img.shields.io/badge/Version-2.3.0-orange)]()
 
 </div>
 
@@ -17,7 +18,7 @@
 
 ### **All-in-One Workflow Solutions**
 - **No more node spaghetti!** Each Bawk Node combines multiple functions into clean, powerful tools
-- **FLUX-first design** - Every node is optimized specifically for FLUX models
+- **FLUX & Z-Image optimized** - Nodes designed for both FLUX and Z-Image-Turbo models
 - **Professional results** with minimal setup time
 
 ### **Perfect For:**
@@ -80,30 +81,43 @@
 - **Validation** - Helpful warnings for compatibility issues
 - **FLUX-specific** optimizations
 
+### **Z-Image Loader**
+*Lightning-fast generation with Z-Image-Turbo*
+- **Native ComfyUI support** - Uses built-in Z-Image/Lumina2 architecture
+- **Only 8 steps** - State-of-the-art quality with minimal compute
+- **No CFG needed** - Guidance scale 0.0 (distilled model)
+- **Same workflow** - Drop-in replacement for FLUX loader
 
 ---
 
 ## **Quick Start Guide**
 
-### **1. Basic Text-to-Image Workflow**
+### **1. Basic Text-to-Image Workflow (FLUX)**
 ```
 Bawk Model Loader → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
+                                            (30 steps, guidance 3.5)
 ```
 
-### **2. Image-to-Image Workflow**
+### **2. Z-Image Turbo Workflow (8 steps!)**
+```
+Z-Image Loader → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
+                                         (8 steps, guidance 0.0)
+```
+
+### **3. Image-to-Image Workflow**
 ```
 Bawk Image Loader → Bawk Sampler → Bawk Image Saver
                    ↗ (set denoise 0.6-0.8)
 ```
 
-### **3. AI-Enhanced Prompt Workflow**
+### **4. AI-Enhanced Prompt Workflow**
 ```
 Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
   (LoRAs + wildcards       (generate)
    + AI enhancement)
 ```
 
-### **4. Batch Generation Workflow**
+### **5. Batch Generation Workflow**
 ```
 Bawk Batch Processor → Bawk Wildcard Encoder → Bawk Sampler → Bawk Image Saver
 ```
@@ -167,14 +181,18 @@ prompt,seed,steps,guidance,resolution
 
 ---
 
-## **What's New in v2.1.0**
+## **What's New in v2.3.0**
 
+- **Z-Image-Turbo Support** - Native support for Z-Image models (8 steps, no CFG needed!)
+- **Z-Image Loader** - Drop-in replacement for FLUX workflow, same node chain
+- **Unified Sampler** - BawkSampler works with both FLUX and Z-Image models
+- **Example Workflows** - Included workflows for both FLUX and Z-Image
+
+### Previous Updates (v2.1.0)
 - **Integrated AI Enhancement** - Built directly into Bawk Wildcard Encoder (100% optional)
 - **Multi-Provider AI Support** - Claude (Anthropic), OpenAI (GPT-4/3.5), and Grok (xAI)
 - **8 Enhancement Styles** - Photography, cinematic, artistic, portrait, landscape, and more
 - **Simplified Workflow** - Single node handles wildcards, LoRAs, and AI enhancement
-- **Security First** - API keys masked in logs, graceful error handling
-- **FLUX Resolution Optimization** - Updated presets based on official limits and community research
 
 ---
 

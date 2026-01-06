@@ -1,5 +1,5 @@
 """
-FluxWildcardEncode Node with LoRA Support (using rgthree-style dynamic UI)
+FluxWildcardEncode Node with LoRA Support
 File: nodes/flux_wildcard_encode.py
 """
 
@@ -13,32 +13,9 @@ import time
 from typing import Tuple, Any, Optional
 
 
-# Fallback implementation for flexible inputs
-class FlexibleOptionalInputType(dict):
-    def __init__(self, type_func, data=None):
-        super().__init__()
-        self.data = data or {}
-        self.type = type_func
-        for key, value in self.data.items():
-            self[key] = value
-    
-    def __contains__(self, key):
-        return True
-    
-    def __getitem__(self, key):
-        if key in self.data:
-            return self.data[key]
-        return self.type
-
-
-def any_type(s=None):
-    return ("*",)
-
-
 class FluxWildcardEncode:
     """
-    Enhanced FLUX wildcard text encoder with integrated LoRA loading.
-    Uses rgthree-style dynamic UI for clean LoRA management.
+    Enhanced FLUX wildcard text encoder with integrated LoRA loading (6 slots).
     """
     
     @classmethod
@@ -51,7 +28,12 @@ class FluxWildcardEncode:
             "required": {
                 "model": ("MODEL",),
                 "clip": ("CLIP",),
-                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "dynamicPrompts": False,
+                    "tooltip": "Your prompt with {wildcard|syntax} support"
+                }),
                 "wildcard_seed": ("INT", {
                     "default": -1, "min": -1, "max": 0xffffffffffffffff,
                     "tooltip": "Seed for wildcard selection. Use -1 to disable wildcards"
@@ -59,67 +41,34 @@ class FluxWildcardEncode:
             },
             "optional": {
                 # LoRA 1
-                "lora_1_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 1 - Use for primary style/character modifications"}),
-                "lora_1_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 1 - Choose your main style or character LoRA"}),
-                "lora_1_strength": ("FLOAT", {"default": 1.00, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 1 strength - Recommended: 0.6-1.2 for styles, 0.8-1.0 for characters"}),
+                "lora_1_on": ("BOOLEAN", {"default": False}),
+                "lora_1_name": (lora_options, {"default": "None"}),
+                "lora_1_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
 
                 # LoRA 2
-                "lora_2_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 2 - Use for secondary effects or style blending"}),
-                "lora_2_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 2 - Good for lighting or pose adjustments"}),
-                "lora_2_strength": ("FLOAT", {"default": 0.80, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 2 strength - Recommended: 0.5-0.8 for subtle effects, 0.8-1.2 for strong effects"}),
+                "lora_2_on": ("BOOLEAN", {"default": False}),
+                "lora_2_name": (lora_options, {"default": "None"}),
+                "lora_2_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
 
                 # LoRA 3
-                "lora_3_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 3 - Use for clothing, objects, or environmental effects"}),
-                "lora_3_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 3 - Perfect for clothing or object LoRAs"}),
-                "lora_3_strength": ("FLOAT", {"default": 0.70, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 3 strength - Recommended: 0.4-0.7 for clothing, 0.6-1.0 for objects"}),
+                "lora_3_on": ("BOOLEAN", {"default": False}),
+                "lora_3_name": (lora_options, {"default": "None"}),
+                "lora_3_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
 
                 # LoRA 4
-                "lora_4_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 4 - Use for fine details or texture adjustments"}),
-                "lora_4_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 4 - Good for detail enhancement or texture LoRAs"}),
-                "lora_4_strength": ("FLOAT", {"default": 0.60, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 4 strength - Recommended: 0.3-0.6 for subtle details, 0.5-0.8 for noticeable changes"}),
+                "lora_4_on": ("BOOLEAN", {"default": False}),
+                "lora_4_name": (lora_options, {"default": "None"}),
+                "lora_4_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
 
                 # LoRA 5
-                "lora_5_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 5 - Use for color grading or mood adjustments"}),
-                "lora_5_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 5 - Ideal for color/mood LoRAs or experimental combinations"}),
-                "lora_5_strength": ("FLOAT", {"default": 0.50, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 5 strength - Recommended: 0.2-0.5 for color adjustments, 0.4-0.7 for experimental effects"}),
+                "lora_5_on": ("BOOLEAN", {"default": False}),
+                "lora_5_name": (lora_options, {"default": "None"}),
+                "lora_5_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
 
                 # LoRA 6
-                "lora_6_on": ("BOOLEAN", {"default": False, "tooltip": "Enable LoRA 6 - Use for final touches or very subtle adjustments"}),
-                "lora_6_name": (lora_options, {"default": "None", "tooltip": "Select LoRA file for slot 6 - Use for final polish or very specific adjustments"}),
-                "lora_6_strength": ("FLOAT", {"default": 0.40, "min": -10.0, "max": 10.0, "step": 0.01, "tooltip": "LoRA 6 strength - Recommended: 0.1-0.4 for subtle effects, negative values to reduce certain features"}),
-
-                # AI ENHANCEMENT (100% Optional)
-                "ai_enhance_enabled": ("BOOLEAN", {"default": False, "tooltip": "Enable AI prompt enhancement (requires API key)"}),
-                "ai_provider": ([
-                    "Claude (Anthropic)",
-                    "OpenAI GPT-4",
-                    "OpenAI GPT-3.5",
-                    "Grok (xAI)"
-                ], {
-                    "default": "Claude (Anthropic)",
-                    "tooltip": "AI service for prompt enhancement"
-                }),
-                "ai_api_key": ("STRING", {
-                    "default": "",
-                    "tooltip": "Your API key for Claude/OpenAI/Grok (only used if AI enhancement enabled)"
-                }),
-                "ai_style": ([
-                    "Detailed & Descriptive",
-                    "Photography Style",
-                    "Cinematic",
-                    "Artistic & Creative",
-                    "Anime/Illustration",
-                    "Professional Portrait",
-                    "Landscape/Nature",
-                    "Abstract/Conceptual"
-                ], {
-                    "default": "Detailed & Descriptive",
-                    "tooltip": "Enhancement style (only used if AI enhancement enabled)"
-                }),
-                "ai_creativity": ("FLOAT", {
-                    "default": 0.7, "min": 0.1, "max": 1.0, "step": 0.1,
-                    "tooltip": "AI creativity level - 0.3=conservative, 0.7=balanced, 1.0=very creative"
-                }),
+                "lora_6_on": ("BOOLEAN", {"default": False}),
+                "lora_6_name": (lora_options, {"default": "None"}),
+                "lora_6_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
             }
         }
     
@@ -127,11 +76,9 @@ class FluxWildcardEncode:
     RETURN_NAMES = ("MODEL", "CLIP", "CONDITIONING", "PROMPT_OUT")
     FUNCTION = "encode_with_loras"
     CATEGORY = "BawkNodes/conditioning"
-    DESCRIPTION = "FLUX text encoder with wildcard support, 6 LoRA slots, and optional AI prompt enhancement"
-    
-    def encode_with_loras(self, model, clip, prompt, wildcard_seed=-1,
-                         ai_enhance_enabled=False, ai_provider="Claude (Anthropic)",
-                         ai_api_key="", ai_style="Detailed & Descriptive", ai_creativity=0.7, **kwargs):
+    DESCRIPTION = "🎲 FLUX text encoder with {wildcard|syntax} support and 6 integrated LoRA slots"
+
+    def encode_with_loras(self, model, clip, prompt, wildcard_seed=-1, **kwargs):
         """
         Encode text prompt with wildcard processing and dynamic LoRA loading
         """
@@ -143,57 +90,47 @@ class FluxWildcardEncode:
             cleaned_kwargs = self._clean_kwargs(kwargs)
 
             # Step 1: Process wildcards if seed is provided
-            processed_prompt = prompt
+            final_prompt = prompt
             if wildcard_seed != -1:
-                processed_prompt = self._process_wildcards(prompt, wildcard_seed)
-                if processed_prompt != prompt:
+                final_prompt = self._process_wildcards(prompt, wildcard_seed)
+                if final_prompt != prompt:
                     print(f"[FluxWildcardEncode] Processed wildcards in prompt")
 
-            # Step 1.5: AI Enhancement (100% Optional)
-            final_prompt = processed_prompt
-            if ai_enhance_enabled:
-                if ai_api_key.strip():
-                    print(f"[FluxWildcardEncode] AI Enhancement enabled with {ai_provider}")
-                    enhanced_prompt = self._enhance_prompt_with_ai(
-                        processed_prompt, ai_provider, ai_api_key, ai_style, ai_creativity
-                    )
-                    if enhanced_prompt:
-                        final_prompt = enhanced_prompt
-                        improvement_ratio = len(final_prompt) / len(processed_prompt) if len(processed_prompt) > 0 else 1
-                        print(f"[FluxWildcardEncode] ✅ AI Enhanced: {len(processed_prompt)} → {len(final_prompt)} chars ({improvement_ratio:.1f}x)")
-                    else:
-                        print(f"[FluxWildcardEncode] ⚠️  AI enhancement failed, using original prompt")
-                else:
-                    print(f"[FluxWildcardEncode] ⚠️  AI enhancement enabled but no API key provided")
-
-            # Step 2: Apply LoRAs from fixed slots with smart validation
+            # Step 2: Apply dynamic LoRAs from kwargs
             working_model = model
             working_clip = clip
             ui_lora_count = 0
-            lora_warnings = []
 
-            # Process 6 fixed LoRA slots
-            for i in range(1, 7):  # LoRA 1-6
+            # Process dynamic LoRA slots from kwargs
+            # Look for patterns like: lora_1_on, lora_1_name, lora_1_strength
+            lora_numbers = set()
+            for key in cleaned_kwargs.keys():
+                if key.startswith('lora_') and '_on' in key:
+                    # Extract the number from lora_N_on
+                    try:
+                        num = int(key.split('_')[1])
+                        lora_numbers.add(num)
+                    except (IndexError, ValueError):
+                        pass
+
+            # Sort and process LoRAs in order
+            for i in sorted(lora_numbers):
                 on_key = f"lora_{i}_on"
                 name_key = f"lora_{i}_name"
                 strength_key = f"lora_{i}_strength"
 
-                # Get cleaned values for this LoRA slot
+                # Get values for this LoRA slot
                 lora_enabled = cleaned_kwargs.get(on_key, False)
                 lora_name = cleaned_kwargs.get(name_key, "None")
                 lora_strength = cleaned_kwargs.get(strength_key, 1.0)
 
-                # Validate LoRA configuration and provide feedback
-                if lora_enabled and lora_name != "None":
-                    self._validate_lora_config(i, lora_name, lora_strength, lora_warnings)
-
                 if lora_enabled and lora_name and lora_name != "None":
                     strength = lora_strength
-                    
+
                     # Skip if strength is zero
                     if strength == 0:
                         continue
-                    
+
                     try:
                         from nodes import LoraLoader
                         working_model, working_clip = LoraLoader().load_lora(
@@ -209,7 +146,7 @@ class FluxWildcardEncode:
             else:
                 print(f"[FluxWildcardEncode] No LoRAs applied")
             
-            # Step 3: Encode the final prompt (after optional AI enhancement)
+            # Step 3: Encode the final prompt
             if not final_prompt.strip():
                 print("[FluxWildcardEncode] Warning: Empty final prompt")
                 empty_conditioning = [[torch.zeros((1, 77, 768)), {"pooled_output": torch.zeros((1, 768))}]]
@@ -220,8 +157,7 @@ class FluxWildcardEncode:
             conditioning, pooled = working_clip.encode_from_tokens(tokens, return_pooled=True)
             conditioning = [[conditioning, {"pooled_output": pooled}]]
 
-            ai_status = " + AI Enhanced" if ai_enhance_enabled and final_prompt != processed_prompt else ""
-            print(f"[FluxWildcardEncode] ✅ Success: {ui_lora_count} LoRAs{ai_status}, conditioning shape: {conditioning[0][0].shape}")
+            print(f"[FluxWildcardEncode] ✅ Success: {ui_lora_count} LoRAs, conditioning shape: {conditioning[0][0].shape}")
             return (working_model, working_clip, conditioning, final_prompt)
             
         except Exception as e:

@@ -32,11 +32,21 @@ class DiffusionModelLoader(ValidationMixin):
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model_name": (folder_paths.get_filename_list("diffusion_models"),),
-                "vae_name": (folder_paths.get_filename_list("vae") + ["baked VAE"],),
-                "clip_name1": (folder_paths.get_filename_list("text_encoders") + ["none"],),
-                "clip_name2": (folder_paths.get_filename_list("text_encoders") + ["none"],),
-                "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"],),
+                "model_name": (folder_paths.get_filename_list("diffusion_models"), {
+                    "tooltip": "FLUX diffusion model file from models/diffusion_models/"
+                }),
+                "vae_name": (folder_paths.get_filename_list("vae") + ["baked VAE"], {
+                    "tooltip": "VAE model for encoding/decoding. Use 'baked VAE' if model includes VAE"
+                }),
+                "clip_name1": (folder_paths.get_filename_list("text_encoders") + ["none"], {
+                    "tooltip": "Primary text encoder (T5-XXL for FLUX)"
+                }),
+                "clip_name2": (folder_paths.get_filename_list("text_encoders") + ["none"], {
+                    "tooltip": "Secondary text encoder (CLIP-L for FLUX)"
+                }),
+                "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"], {
+                    "tooltip": "Model precision. FP8 reduces VRAM ~50% with minimal quality loss"
+                }),
             }
         }
     
@@ -44,7 +54,7 @@ class DiffusionModelLoader(ValidationMixin):
     RETURN_NAMES = ("MODEL", "VAE", "CLIP", "MODEL_STRING")
     FUNCTION = "load_diffusion_model"
     CATEGORY = "BawkNodes/loaders"
-    DESCRIPTION = "Advanced diffusion model loader for FLUX and other modern architectures"
+    DESCRIPTION = "🚀 Advanced FLUX model loader with separate VAE/CLIP loading and FP8 quantization support"
     
     @classmethod
     def VALIDATE_INPUTS(cls, **kwargs):
