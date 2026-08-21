@@ -1,8 +1,8 @@
 {
   "id": "666722b8-d65d-595a-87bc-d166e8f2cf47",
   "revision": 0,
-  "last_node_id": 7,
-  "last_link_id": 10,
+  "last_node_id": 8,
+  "last_link_id": 12,
   "nodes": [
     {
       "id": 1,
@@ -70,7 +70,7 @@
       ],
       "size": [
         420,
-        560
+        640
       ],
       "flags": {},
       "order": 1,
@@ -89,7 +89,7 @@
         {
           "name": "lora_stack",
           "type": "LORA_STACK",
-          "link": 10
+          "link": 12
         }
       ],
       "outputs": [
@@ -118,6 +118,13 @@
           "links": [
             7
           ]
+        },
+        {
+          "name": "LORA_INFO",
+          "type": "STRING",
+          "links": [
+            9
+          ]
         }
       ],
       "properties": {
@@ -128,18 +135,25 @@
         "A {cinematic|candid|editorial} photo of a rooster wearing a tiny leather jacket, golden hour light, shallow depth of field",
         0,
         "randomize",
+        "prepend",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
-        1.0
+        1.0,
+        ""
       ]
     },
     {
@@ -252,6 +266,11 @@
           "name": "processed_prompt",
           "type": "STRING",
           "link": 7
+        },
+        {
+          "name": "lora_info",
+          "type": "STRING",
+          "link": 9
         }
       ],
       "outputs": [],
@@ -277,8 +296,8 @@
         440
       ],
       "size": [
-        380,
-        400
+        400,
+        560
       ],
       "flags": {},
       "order": 4,
@@ -295,8 +314,18 @@
           "name": "lora_stack",
           "type": "LORA_STACK",
           "links": [
-            9
+            10
           ]
+        },
+        {
+          "name": "lora_triggers",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "lora_info",
+          "type": "STRING",
+          "links": []
         }
       ],
       "properties": {
@@ -307,29 +336,35 @@
         true,
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
-        1.0
+        1.0,
+        ""
       ],
-      "title": "LoRA Set A (on)"
+      "title": "LoRA Set A"
     },
     {
       "id": 6,
       "type": "BawkLoraStack",
       "pos": [
         80,
-        900
+        1060
       ],
       "size": [
-        380,
-        400
+        400,
+        560
       ],
       "flags": {},
       "order": 5,
@@ -338,7 +373,7 @@
         {
           "name": "lora_stack",
           "type": "LORA_STACK",
-          "link": 9
+          "link": null
         }
       ],
       "outputs": [
@@ -346,8 +381,18 @@
           "name": "lora_stack",
           "type": "LORA_STACK",
           "links": [
-            10
+            11
           ]
+        },
+        {
+          "name": "lora_triggers",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "lora_info",
+          "type": "STRING",
+          "links": []
         }
       ],
       "properties": {
@@ -355,24 +400,94 @@
         "Node name for S&R": "BawkLoraStack"
       },
       "widgets_values": [
-        false,
+        true,
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
-        1.0
+        1.0,
+        ""
       ],
-      "title": "LoRA Set B (off)"
+      "title": "LoRA Set B"
     },
     {
       "id": 7,
+      "type": "BawkLoraSwitch",
+      "pos": [
+        540,
+        900
+      ],
+      "size": [
+        300,
+        140
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "set_a",
+          "type": "LORA_STACK",
+          "link": 10
+        },
+        {
+          "name": "set_b",
+          "type": "LORA_STACK",
+          "link": 11
+        },
+        {
+          "name": "set_c",
+          "type": "LORA_STACK",
+          "link": null
+        },
+        {
+          "name": "set_d",
+          "type": "LORA_STACK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_stack",
+          "type": "LORA_STACK",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "lora_triggers",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "lora_info",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-bawknodes",
+        "Node name for S&R": "BawkLoraSwitch"
+      },
+      "widgets_values": [
+        "A"
+      ],
+      "title": "LoRA Switch"
+    },
+    {
+      "id": 8,
       "type": "MarkdownNote",
       "pos": [
         80,
@@ -383,13 +498,13 @@
         120
       ],
       "flags": {},
-      "order": 6,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "**FLUX.1 dev / Krea dev** text to image. Two chained LoRA stacks: fill Set A and Set B, flip `enabled` to switch sets. Krea: same settings, just pick the Krea model."
+        "**FLUX.1 dev / Krea dev** text to image. Fill LoRA Set A and Set B (each slot: LoRA, strength, trigger words), pick the active set on the LoRA Switch. Trigger words of active LoRAs are prepended to the prompt automatically. Krea: same settings, just pick the Krea model."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -462,15 +577,31 @@
     ],
     [
       9,
+      2,
+      4,
+      4,
+      3,
+      "STRING"
+    ],
+    [
+      10,
       5,
       0,
-      6,
+      7,
       0,
       "LORA_STACK"
     ],
     [
-      10,
+      11,
       6,
+      0,
+      7,
+      1,
+      "LORA_STACK"
+    ],
+    [
+      12,
+      7,
       0,
       2,
       2,

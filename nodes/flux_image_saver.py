@@ -55,6 +55,7 @@ class FluxImageSaver:
                     "forceInput": True, "tooltip": "MODEL_STRING from Bawk Model Loader (used for the folder name)",
                 }),
                 "processed_prompt": ("STRING", {"forceInput": True, "tooltip": "PROMPT_OUT from Bawk Wildcard Encoder"}),
+                "lora_info": ("STRING", {"forceInput": True, "tooltip": "LORA_INFO from Bawk Wildcard Encoder"}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -68,7 +69,7 @@ class FluxImageSaver:
     )
 
     def save_images(self, images, prefix="flux_image", format="png", quality=95, save_metadata=True, save_prompt=True,
-                    send_to_discord=False, discord_webhook_url="", model_string="", processed_prompt="",
+                    send_to_discord=False, discord_webhook_url="", model_string="", processed_prompt="", lora_info="",
                     prompt=None, extra_pnginfo=None):
         now = datetime.now()
         date_str = now.strftime("%d-%m-%Y")
@@ -81,7 +82,7 @@ class FluxImageSaver:
 
         if save_prompt and processed_prompt:
             with open(_unique_path(output_dir, f"{prefix}_{stamp}_prompt", "txt"), "w", encoding="utf-8") as f:
-                f.write(processed_prompt)
+                f.write(processed_prompt if not lora_info else f"{processed_prompt}\n\nLoRAs: {lora_info}")
 
         pnginfo = None
         sidecar = None
@@ -96,11 +97,14 @@ class FluxImageSaver:
                     pnginfo.add_text("bawk_prompt", processed_prompt)
                 if model_string:
                     pnginfo.add_text("bawk_model", model_string)
+                if lora_info:
+                    pnginfo.add_text("bawk_loras", lora_info)
             else:
                 sidecar = {
                     "timestamp": now.isoformat(),
                     "model": model_string,
                     "processed_prompt": processed_prompt,
+                    "loras": lora_info,
                     "prompt": prompt,
                     "extra_pnginfo": extra_pnginfo,
                 }
@@ -128,14 +132,16 @@ class FluxImageSaver:
 
         if send_to_discord and discord_webhook_url.strip():
             try:
-                self._send_to_discord(saved_paths, discord_webhook_url.strip(), processed_prompt, model_string)
+                self._send_to_discord(saved_paths, discord_webhook_url.strip(), processed_prompt, model_string, lora_info)
             except Exception as e:
                 logging.warning(f"[FluxImageSaver] Discord webhook failed: {e}")
 
         return {"ui": {"images": results}}
 
-    def _send_to_discord(self, paths, webhook_url, prompt, model):
+    def _send_to_discord(self, paths, webhook_url, prompt, model, lora_info=""):
         description = f"**Model:** {model or 'unknown'}\n**Prompt:** {prompt[:1000]}{'...' if len(prompt) > 1000 else ''}"
+        if lora_info:
+            description += f"\n**LoRAs:** {lora_info[:500]}"
         embed = {
             "title": "New generation",
             "description": description,

@@ -24,6 +24,8 @@ except ImportError:
 RESOLUTION_PRESETS = {
     "1:1 Square - 1024x1024": (1024, 1024),
     "1:1 Square Large - 1408x1408": (1408, 1408),
+    "5:4 Landscape - 1280x1024": (1280, 1024),
+    "4:5 Portrait - 1024x1280": (1024, 1280),
     "4:3 Landscape - 1152x896": (1152, 896),
     "3:4 Portrait - 896x1152": (896, 1152),
     "3:2 Landscape - 1216x832": (1216, 832),

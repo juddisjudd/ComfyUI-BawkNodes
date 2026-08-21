@@ -15,8 +15,9 @@ Custom node pack for ComfyUI focused only on FLUX models (FLUX.1 dev / Krea / Ko
 | Node id | Purpose |
 | --- | --- |
 | `DiffusionModelLoader` | model + VAE + text encoder(s). 2 encoders = FLUX.1 (`CLIPType.FLUX`), 1 encoder = FLUX.2 (`CLIPType.FLUX2`). `.gguf` files go through ComfyUI-GGUF's node classes looked up in `nodes.NODE_CLASS_MAPPINGS` at run time. |
-| `BawkLoraStack` | 6 LoRA slots, chainable (`lora_stack` in/out), `enabled` master switch for set switching. |
-| `FluxWildcardEncode` | applies `lora_stack` + 6 inline slots, resolves `{a|b}` wildcards, encodes with `encode_from_tokens_scheduled`. |
+| `BawkLoraStack` | 6 slots (lora, strength, trigger words), chainable, `enabled` master switch. LORA_STACK is `{"loras": [(name, strength)], "triggers": [str]}`. |
+| `BawkLoraSwitch` | picks one of `set_a..set_d`; only that set's LoRAs load. |
+| `FluxWildcardEncode` | applies `lora_stack` + 6 inline slots, adds active trigger words (prepend/append/off), resolves `{a|b}` wildcards, encodes with `encode_from_tokens_scheduled`, outputs `LORA_INFO`. |
 | `BawkSampler` | builds latent from `model.get_model_object("latent_format")` (16ch/8 for FLUX.1, 128ch/16 for FLUX.2), sets `guidance` in conditioning, optional `reference_latents` for Kontext / klein edit, `cfg` > 1 uses `CFGGuider` with zeroed negative (klein base only), FLUX.1 gets the resolution-dependent shift patch, FLUX.2 uses its own schedule when scheduler is `auto`. |
 | `FluxImageSaver` | `[model]-DD-MM-YYYY/` folders, PNG metadata written with `json.dumps` like core `SaveImage`, optional Discord webhook. |
 | `BawkImageLoader` | Load Image + resize / pad + size outputs. |

@@ -1,13 +1,14 @@
 """
-FluxWildcardEncode - LoRA application + {a|b|c} wildcards + FLUX text encoding.
+FluxWildcardEncode - LoRA application + trigger words + {a|b|c} wildcards + FLUX text encoding.
 """
 
 import random
 import re
 
-from .lora_stack import apply_lora_stack, collect_lora_slots, lora_slot_inputs
+from .lora_stack import apply_lora_stack, collect_lora_slots, lora_slot_inputs, merge_stacks, stack_info
 
 WILDCARD_RE = re.compile(r"\{([^{}]*\|[^{}]*)\}")
+TRIGGER_MODES = ["prepend", "append", "off"]
 
 
 def process_wildcards(prompt, seed):
@@ -23,6 +24,16 @@ def process_wildcards(prompt, seed):
             break
         prompt = resolved
     return prompt
+
+
+def add_triggers(prompt, triggers, mode):
+    triggers = [t for t in triggers if t and t.lower() not in prompt.lower()]
+    if mode == "off" or not triggers:
+        return prompt
+    joined = ", ".join(triggers)
+    if not prompt.strip():
+        return joined
+    return f"{joined}, {prompt}" if mode == "prepend" else f"{prompt.rstrip().rstrip(',')}, {joined}"
 
 
 class FluxWildcardEncode:
@@ -43,29 +54,33 @@ class FluxWildcardEncode:
                     "control_after_generate": True,
                     "tooltip": "Seed for wildcard picks. Same seed = same picks",
                 }),
+                "trigger_words": (TRIGGER_MODES, {
+                    "default": "prepend",
+                    "tooltip": "Where LoRA trigger words go. Words already in the prompt are not repeated",
+                }),
             },
             "optional": {
                 "lora_stack": ("LORA_STACK", {
-                    "tooltip": "LoRA set(s) from Bawk LoRA Stack. Applied before the slots below",
+                    "tooltip": "LoRA set(s) from Bawk LoRA Stack / Switch. Applied before the slots below",
                 }),
-                **lora_slot_inputs(),
+                **lora_slot_inputs(with_triggers=True),
             },
         }
 
-    RETURN_TYPES = ("MODEL", "CLIP", "CONDITIONING", "STRING")
-    RETURN_NAMES = ("MODEL", "CLIP", "CONDITIONING", "PROMPT_OUT")
+    RETURN_TYPES = ("MODEL", "CLIP", "CONDITIONING", "STRING", "STRING")
+    RETURN_NAMES = ("MODEL", "CLIP", "CONDITIONING", "PROMPT_OUT", "LORA_INFO")
     FUNCTION = "encode"
     CATEGORY = "BawkNodes/conditioning"
     DESCRIPTION = (
-        "Apply LoRAs, resolve {a|b|c} wildcards and encode the prompt for FLUX. "
+        "Apply LoRAs, add their trigger words, resolve {a|b|c} wildcards and encode the prompt for FLUX. "
         "FLUX has no negative prompt; guidance is set in Bawk Sampler."
     )
 
-    def encode(self, model, clip, prompt, wildcard_seed=0, lora_stack=None, **kwargs):
-        stack = list(lora_stack or []) + collect_lora_slots(kwargs)
+    def encode(self, model, clip, prompt, wildcard_seed=0, trigger_words="prepend", lora_stack=None, **kwargs):
+        stack = merge_stacks(lora_stack, collect_lora_slots(kwargs))
         model, clip = apply_lora_stack(model, clip, stack)
 
-        final_prompt = process_wildcards(prompt, wildcard_seed)
+        final_prompt = process_wildcards(add_triggers(prompt, stack["triggers"], trigger_words), wildcard_seed)
         tokens = clip.tokenize(final_prompt)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
-        return (model, clip, conditioning, final_prompt)
+        return (model, clip, conditioning, final_prompt, stack_info(stack))

@@ -2,7 +2,7 @@
   "id": "f843c6e7-4d53-574c-90d2-b6e170e6fbeb",
   "revision": 0,
   "last_node_id": 7,
-  "last_link_id": 10,
+  "last_link_id": 11,
   "nodes": [
     {
       "id": 1,
@@ -70,7 +70,7 @@
       ],
       "size": [
         420,
-        560
+        640
       ],
       "flags": {},
       "order": 1,
@@ -118,6 +118,13 @@
           "links": [
             7
           ]
+        },
+        {
+          "name": "LORA_INFO",
+          "type": "STRING",
+          "links": [
+            9
+          ]
         }
       ],
       "properties": {
@@ -128,18 +135,25 @@
         "Put the jacket from image 2 on the rooster in image 1, keep the pose",
         0,
         "randomize",
+        "prepend",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
         1.0,
+        "",
         "None",
-        1.0
+        1.0,
+        ""
       ]
     },
     {
@@ -180,12 +194,12 @@
         {
           "name": "reference_image",
           "type": "IMAGE",
-          "link": 9
+          "link": 10
         },
         {
           "name": "reference_image_2",
           "type": "IMAGE",
-          "link": 10
+          "link": 11
         }
       ],
       "outputs": [
@@ -252,6 +266,11 @@
           "name": "processed_prompt",
           "type": "STRING",
           "link": 7
+        },
+        {
+          "name": "lora_info",
+          "type": "STRING",
+          "link": 9
         }
       ],
       "outputs": [],
@@ -289,7 +308,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            9
+            10
           ]
         },
         {
@@ -327,7 +346,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            10
+            11
           ]
         },
         {
@@ -436,6 +455,14 @@
     ],
     [
       9,
+      2,
+      4,
+      4,
+      3,
+      "STRING"
+    ],
+    [
+      10,
       5,
       0,
       3,
@@ -443,7 +470,7 @@
       "IMAGE"
     ],
     [
-      10,
+      11,
       6,
       0,
       3,

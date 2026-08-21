@@ -3,6 +3,7 @@ import { app } from "../../scripts/app.js";
 const NODE_COLORS = {
     DiffusionModelLoader: ["#1a2332", "#4a90e2"],
     BawkLoraStack: ["#32301a", "#f39c12"],
+    BawkLoraSwitch: ["#32301a", "#f1c40f"],
     FluxWildcardEncode: ["#2a1a32", "#9b59b6"],
     BawkSampler: ["#32261a", "#e67e22"],
     FluxImageSaver: ["#1a3226", "#27ae60"],
