@@ -1,4 +1,5 @@
 import { app } from "../../scripts/app.js";
+import { ComfyWidgets } from "../../scripts/widgets.js";
 
 const NODE_COLORS = {
     DiffusionModelLoader: ["#1a2332", "#4a90e2"],
@@ -10,6 +11,19 @@ const NODE_COLORS = {
     BawkImageLoader: ["#1a3226", "#2ecc71"],
     BawkBatchProcessor: ["#1a2a32", "#16a085"],
 };
+
+const PREVIEW_WIDGET = "final_prompt_preview";
+
+function ensurePreviewWidget(node) {
+    let widget = node.widgets?.find((w) => w.name === PREVIEW_WIDGET);
+    if (widget) return widget;
+    widget = ComfyWidgets.STRING(node, PREVIEW_WIDGET, ["STRING", { multiline: true }], app).widget;
+    widget.inputEl.readOnly = true;
+    widget.inputEl.style.opacity = 0.7;
+    widget.inputEl.placeholder = "Final prompt appears here after the node runs";
+    widget.serializeValue = async () => "";
+    return widget;
+}
 
 app.registerExtension({
     name: "bawk.nodes",
@@ -27,7 +41,23 @@ app.registerExtension({
                     widget.inputEl.placeholder = "Prompt... use {option1|option2} for wildcards";
                 }
             }
+            if (nodeData.name === "FluxWildcardEncode") {
+                ensurePreviewWidget(this);
+            }
             return result;
         };
+
+        if (nodeData.name === "FluxWildcardEncode") {
+            const onExecuted = nodeType.prototype.onExecuted;
+            nodeType.prototype.onExecuted = function (message) {
+                onExecuted?.apply(this, arguments);
+                const text = message?.text;
+                if (!text) return;
+                const widget = ensurePreviewWidget(this);
+                widget.value = Array.isArray(text) ? text.join("\n") : String(text);
+                this.setSize([this.size[0], Math.max(this.size[1], this.computeSize()[1])]);
+                this.setDirtyCanvas(true, true);
+            };
+        }
     },
 });

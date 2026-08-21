@@ -80,4 +80,6 @@ class FluxWildcardEncode:
         final_prompt = process_wildcards(add_triggers(prompt, stack["triggers"], trigger_words), wildcard_seed)
         tokens = clip.tokenize(final_prompt)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
-        return (model, clip, conditioning, final_prompt, stack_info(stack))
+        info = stack_info(stack)
+        preview = final_prompt if not info else f"{final_prompt}\n\n[LoRAs] {info}"
+        return {"ui": {"text": [preview]}, "result": (model, clip, conditioning, final_prompt, info)}
