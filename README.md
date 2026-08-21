@@ -41,7 +41,7 @@ Six slots per node, each with LoRA, strength and **trigger words**. Trigger word
 Up to four sets in (`set_a` … `set_d`), one `active` dropdown. Only the chosen set is loaded. Feed the result into the encoder's `lora_stack` input.
 
 ### 🎲 Bawk Wildcard Encoder
-- Applies the incoming `lora_stack` plus six inline LoRA slots to MODEL and CLIP.
+- Applies the incoming `lora_stack` (from Bawk LoRA Stack / Switch) to MODEL and CLIP.
 - `trigger_words`: prepend / append / off. Words already present in the prompt are not repeated.
 - `{red|green|blue}` wildcards, seeded by `wildcard_seed` (nesting allowed).
 - Outputs the resolved prompt and a `LORA_INFO` summary (`name@strength, …`) for the saver.

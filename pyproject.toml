@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-bawknodes"
-version = "3.1.0"
+version = "3.1.1"
 description = "Compact FLUX.1 / FLUX.2 workflow nodes for ComfyUI: model loader (safetensors + GGUF), switchable LoRA sets, wildcard encoder, all-in-one sampler and organized image saver."
 readme = "README.md"
 license = { file = "LICENSE" }

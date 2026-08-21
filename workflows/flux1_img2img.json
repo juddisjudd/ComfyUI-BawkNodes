@@ -70,7 +70,7 @@
       ],
       "size": [
         420,
-        640
+        260
       ],
       "flags": {},
       "order": 1,
@@ -135,25 +135,7 @@
         "A watercolor painting of {a rooster|a hen}, soft pastel colors",
         0,
         "randomize",
-        "prepend",
-        "None",
-        1.0,
-        "",
-        "None",
-        1.0,
-        "",
-        "None",
-        1.0,
-        "",
-        "None",
-        1.0,
-        "",
-        "None",
-        1.0,
-        "",
-        "None",
-        1.0,
-        ""
+        "prepend"
       ]
     },
     {
