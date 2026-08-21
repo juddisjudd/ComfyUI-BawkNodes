@@ -2,342 +2,126 @@
   "id": "b4a7c8d9-e5f6-4a1b-9c2d-3e4f5a6b7c8d",
   "revision": 0,
   "last_node_id": 5,
-  "last_link_id": 8,
+  "last_link_id": 9,
   "nodes": [
     {
       "id": 1,
       "type": "DiffusionModelLoader",
-      "pos": [
-        100,
-        200
-      ],
-      "size": [
-        350,
-        170
-      ],
+      "pos": [80, 200],
+      "size": [380, 180],
       "flags": {},
       "order": 0,
       "mode": 0,
       "inputs": [],
       "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            1
-          ],
-          "slot_index": 0
-        },
-        {
-          "name": "VAE",
-          "type": "VAE",
-          "links": [
-            3
-          ],
-          "slot_index": 1
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            2
-          ],
-          "slot_index": 2
-        },
-        {
-          "name": "MODEL_STRING",
-          "type": "STRING",
-          "links": [
-            6
-          ],
-          "slot_index": 3
-        }
+        {"name": "MODEL", "type": "MODEL", "links": [1]},
+        {"name": "VAE", "type": "VAE", "links": [3]},
+        {"name": "CLIP", "type": "CLIP", "links": [2]},
+        {"name": "MODEL_STRING", "type": "STRING", "links": [7]}
       ],
-      "properties": {
-        "cnr_id": "comfyui-bawknodes",
-        "Node name for S&R": "DiffusionModelLoader"
-      },
-      "widgets_values": [
-        "flux1-dev.safetensors",
-        "ae.safetensors",
-        "t5xxl_fp16.safetensors",
-        "clip_l.safetensors",
-        "fp8_e4m3fn"
-      ],
-      "shape": 1
+      "properties": {"cnr_id": "comfyui-bawknodes", "Node name for S&R": "DiffusionModelLoader"},
+      "widgets_values": ["flux1-dev.safetensors", "ae.safetensors", "t5xxl_fp16.safetensors", "clip_l.safetensors", "fp8_e4m3fn"]
     },
     {
       "id": 2,
-      "type": "FluxWildcardEncode",
-      "pos": [
-        500,
-        200
-      ],
-      "size": [
-        400,
-        550
-      ],
+      "type": "BawkLoraStack",
+      "pos": [80, 440],
+      "size": [380, 400],
       "flags": {},
       "order": 1,
       "mode": 0,
       "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 1
-        },
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 2
-        }
+        {"name": "lora_stack", "type": "LORA_STACK", "link": null}
       ],
       "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            4
-          ],
-          "slot_index": 0
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": null,
-          "slot_index": 1
-        },
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            5
-          ],
-          "slot_index": 2
-        },
-        {
-          "name": "PROMPT_OUT",
-          "type": "STRING",
-          "links": [
-            7
-          ],
-          "slot_index": 3
-        }
+        {"name": "lora_stack", "type": "LORA_STACK", "links": [4]}
       ],
-      "properties": {
-        "cnr_id": "comfyui-bawknodes",
-        "Node name for S&R": "FluxWildcardEncode"
-      },
-      "widgets_values": [
-        "A stunning {portrait|landscape} photograph of a {mountain lake|forest clearing|coastal cliff} at {golden hour|blue hour|sunrise}, professional photography, 8K resolution, sharp focus, dramatic lighting",
-        42,
-        false,
-        "None",
-        1.0,
-        false,
-        "None",
-        1.0,
-        false,
-        "None",
-        1.0,
-        false,
-        "None",
-        1.0,
-        false,
-        "None",
-        1.0,
-        false,
-        "None",
-        1.0
-      ],
-      "shape": 1
+      "properties": {"cnr_id": "comfyui-bawknodes", "Node name for S&R": "BawkLoraStack"},
+      "widgets_values": [true, "None", 1.0, "None", 1.0, "None", 1.0, "None", 1.0, "None", 1.0, "None", 1.0]
     },
     {
       "id": 3,
-      "type": "BawkSampler",
-      "pos": [
-        950,
-        200
-      ],
-      "size": [
-        320,
-        550
-      ],
+      "type": "FluxWildcardEncode",
+      "pos": [520, 200],
+      "size": [420, 560],
       "flags": {},
       "order": 2,
       "mode": 0,
       "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 4
-        },
-        {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 5
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 3
-        },
-        {
-          "name": "input_image",
-          "type": "IMAGE",
-          "link": null
-        }
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "clip", "type": "CLIP", "link": 2},
+        {"name": "lora_stack", "type": "LORA_STACK", "link": 4}
       ],
       "outputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            8
-          ],
-          "slot_index": 0
-        },
-        {
-          "name": "latent",
-          "type": "LATENT",
-          "links": null,
-          "slot_index": 1
-        }
+        {"name": "MODEL", "type": "MODEL", "links": [5]},
+        {"name": "CLIP", "type": "CLIP", "links": []},
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6]},
+        {"name": "PROMPT_OUT", "type": "STRING", "links": [8]}
       ],
-      "properties": {
-        "cnr_id": "comfyui-bawknodes",
-        "Node name for S&R": "BawkSampler"
-      },
+      "properties": {"cnr_id": "comfyui-bawknodes", "Node name for S&R": "FluxWildcardEncode"},
       "widgets_values": [
-        "FLUX Optimal - 1024x1024 - 1.0MP ⭐ Recommended",
-        4,
-        12345,
-        "randomize",
-        "euler",
-        "beta",
-        30,
-        3.5,
-        1.15,
-        0.5,
-        1.0,
-        false,
-        1920,
-        1080
-      ],
-      "shape": 1
+        "A {cinematic|candid|editorial} photo of a rooster wearing a tiny leather jacket, golden hour light, shallow depth of field",
+        0, "fixed",
+        "None", 1.0, "None", 1.0, "None", 1.0, "None", 1.0, "None", 1.0, "None", 1.0
+      ]
     },
     {
       "id": 4,
-      "type": "FluxImageSaver",
-      "pos": [
-        1320,
-        200
-      ],
-      "size": [
-        380,
-        320
-      ],
+      "type": "BawkSampler",
+      "pos": [1000, 200],
+      "size": [400, 520],
       "flags": {},
       "order": 3,
       "mode": 0,
       "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 8
-        },
-        {
-          "name": "model_string",
-          "type": "STRING",
-          "link": 6
-        },
-        {
-          "name": "processed_prompt",
-          "type": "STRING",
-          "link": 7
-        }
+        {"name": "model", "type": "MODEL", "link": 5},
+        {"name": "conditioning", "type": "CONDITIONING", "link": 6},
+        {"name": "vae", "type": "VAE", "link": 3},
+        {"name": "input_image", "type": "IMAGE", "link": null},
+        {"name": "reference_image", "type": "IMAGE", "link": null},
+        {"name": "reference_image_2", "type": "IMAGE", "link": null}
       ],
-      "outputs": [],
-      "properties": {
-        "cnr_id": "comfyui-bawknodes",
-        "Node name for S&R": "FluxImageSaver"
-      },
+      "outputs": [
+        {"name": "images", "type": "IMAGE", "links": [9]},
+        {"name": "latent", "type": "LATENT", "links": []}
+      ],
+      "properties": {"cnr_id": "comfyui-bawknodes", "Node name for S&R": "BawkSampler"},
       "widgets_values": [
-        "flux_output",
-        "png",
-        95,
-        true,
-        true,
-        false,
-        ""
-      ],
-      "shape": 1
+        "1:1 Square - 1024x1024", 1, 0, "randomize", 20, 3.5, "euler", "auto", 1.0,
+        1.0, 1.15, 0.5, 1024, 1024
+      ]
     },
     {
       "id": 5,
-      "type": "PreviewImage",
-      "pos": [
-        1320,
-        570
-      ],
-      "size": [
-        380,
-        300
-      ],
+      "type": "FluxImageSaver",
+      "pos": [1460, 200],
+      "size": [400, 300],
       "flags": {},
       "order": 4,
       "mode": 0,
       "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 8
-        }
+        {"name": "images", "type": "IMAGE", "link": 9},
+        {"name": "model_string", "type": "STRING", "link": 7},
+        {"name": "processed_prompt", "type": "STRING", "link": 8}
       ],
       "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      },
-      "shape": 1
+      "properties": {"cnr_id": "comfyui-bawknodes", "Node name for S&R": "FluxImageSaver"},
+      "widgets_values": ["flux_image", "png", 95, true, true, false, ""]
     }
   ],
   "links": [
-    [1, 1, 0, 2, 0, "MODEL"],
-    [2, 1, 2, 2, 1, "CLIP"],
-    [3, 1, 1, 3, 2, "VAE"],
-    [4, 2, 0, 3, 0, "MODEL"],
-    [5, 2, 2, 3, 1, "CONDITIONING"],
-    [6, 1, 3, 4, 1, "STRING"],
-    [7, 2, 3, 4, 2, "STRING"],
-    [8, 3, 0, 4, 0, "IMAGE"]
+    [1, 1, 0, 3, 0, "MODEL"],
+    [2, 1, 2, 3, 1, "CLIP"],
+    [3, 1, 1, 4, 2, "VAE"],
+    [4, 2, 0, 3, 2, "LORA_STACK"],
+    [5, 3, 0, 4, 0, "MODEL"],
+    [6, 3, 2, 4, 1, "CONDITIONING"],
+    [7, 1, 3, 5, 1, "STRING"],
+    [8, 3, 3, 5, 2, "STRING"],
+    [9, 4, 0, 5, 0, "IMAGE"]
   ],
-  "groups": [
-    {
-      "id": 1,
-      "title": "FLUX Text-to-Image Workflow",
-      "bounding": [
-        50,
-        100,
-        1700,
-        800
-      ],
-      "color": "#32261a",
-      "font_size": 24,
-      "flags": {}
-    }
-  ],
+  "groups": [],
   "config": {},
-  "extra": {
-    "ds": {
-      "scale": 0.9,
-      "offset": [0, 0]
-    },
-    "info": {
-      "name": "BawkNodes FLUX Example Workflow",
-      "description": "Complete FLUX text-to-image workflow with wildcard support, optimized sampling, and organized image saving.",
-      "author": "BawkNodes",
-      "version": "2.2.0"
-    }
-  },
+  "extra": {},
   "version": 0.4
 }

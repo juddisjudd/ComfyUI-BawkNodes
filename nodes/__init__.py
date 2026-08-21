@@ -1,22 +1,17 @@
-"""
-Nodes package initialization
-File: nodes/__init__.py
-"""
-
 from .diffusion_model_loader import DiffusionModelLoader
+from .lora_stack import BawkLoraStack
 from .flux_wildcard_encode import FluxWildcardEncode
-from .flux_image_saver import FluxImageSaver
 from .bawk_sampler import BawkSampler
-from .bawk_batch_processor import BawkBatchProcessor
-from .bawk_controlnet import BawkControlNet
+from .flux_image_saver import FluxImageSaver
 from .bawk_image_loader import BawkImageLoader
+from .bawk_batch_processor import BawkBatchProcessor
 
 __all__ = [
     "DiffusionModelLoader",
+    "BawkLoraStack",
     "FluxWildcardEncode",
-    "FluxImageSaver",
     "BawkSampler",
+    "FluxImageSaver",
+    "BawkImageLoader",
     "BawkBatchProcessor",
-    "BawkControlNet",
-    "BawkImageLoader"
 ]

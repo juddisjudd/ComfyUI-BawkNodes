@@ -1,34 +1,18 @@
 [project]
 name = "comfyui-bawknodes"
-version = "2.2.1"
-description = "A complete collection of FLUX-optimized ComfyUI nodes for enhanced AI image generation workflows."
+version = "3.0.0"
+description = "Compact FLUX.1 / FLUX.2 workflow nodes for ComfyUI: model loader (safetensors + GGUF), switchable LoRA sets, wildcard encoder, all-in-one sampler and organized image saver."
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
-authors = [
-    { name = "judd", email = "" }
-]
-keywords = ["comfyui", "diffusion", "model-loading", "ai", "flux", "nodes", "bawk"]
+requires-python = ">=3.10"
+authors = [{ name = "judd" }]
+keywords = ["comfyui", "flux", "flux2", "klein", "kontext", "lora", "gguf", "bawk"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Multimedia :: Graphics",
 ]
-
-dependencies = [
-    "torch>=1.12.0",
-    "torchvision>=0.13.0",
-    "numpy>=1.21.0",
-    "safetensors>=0.3.0",
-]
+dependencies = ["requests"]
 
 [project.urls]
 Repository = "https://github.com/juddisjudd/ComfyUI-BawkNodes"
@@ -38,14 +22,3 @@ Issues = "https://github.com/juddisjudd/ComfyUI-BawkNodes/issues"
 PublisherId = "judd"
 DisplayName = "Bawk Nodes Collection"
 Icon = "https://raw.githubusercontent.com/juddisjudd/ComfyUI-BawkNodes/refs/heads/main/branding/bawknodes.png"
-
-[build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["modules*", "workflows*"]
-
-[tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "*.yml", "*.md"]

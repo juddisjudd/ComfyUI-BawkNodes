@@ -1,36 +1,9 @@
 {
-  // Pylance/Pyright configuration for ComfyUI custom nodes
-  // ComfyUI-specific modules (folder_paths, comfy.*, etc.) are only available at runtime
-  // So we suppress import warnings that would otherwise clutter the IDE
-
-  "include": [
-    "nodes",
-    "modules",
-    "utils"
-  ],
-
-  "exclude": [
-    "**/__pycache__",
-    ".git",
-    ".venv",
-    "venv",
-    "build",
-    "dist"
-  ],
-
-  // Suppress missing imports - ComfyUI modules aren't in the local environment
-  "reportMissingImports": "none",
-  "reportMissingModuleSource": "warning",
-
-  "stubPath": "",
+  "include": ["__init__.py", "nodes"],
+  "exclude": ["**/__pycache__", ".git"],
   "pythonVersion": "3.10",
-  "pythonPlatform": "All",
   "typeCheckingMode": "basic",
-
-  // Relax type checking for dynamic ComfyUI interfaces
-  "reportGeneralTypeIssues": "none",
-  "reportOptionalMemberAccess": "none",
-  "reportOptionalSubscript": "none",
-  "reportPrivateImportUsage": "none",
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
   "reportAttributeAccessIssue": "none"
 }
