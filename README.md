@@ -72,7 +72,7 @@ git clone https://github.com/juddisjudd/ComfyUI-BawkNodes.git
 
 Requires a ComfyUI build with FLUX.2 support (late 2025 or newer). GGUF loading needs ComfyUI-GGUF.
 
-An example workflow is in [`workflows/example_bawknodes_workflow.json`](workflows/example_bawknodes_workflow.json).
+Example workflows for every supported model family are in [`workflows/`](workflows/): FLUX.1 dev text-to-image (with LoRA sets), img2img, Kontext edit, FLUX.2 dev, klein 4B text-to-image and klein 9B two-reference edit.
 
 ## Changes in 3.0.0
 
